@@ -12,7 +12,34 @@ datasource db {
 
 model User {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
-  id_num String @unique
+  oid String @unique
   name String
-  pass String
+  password String
+  attendance Attendance[]
+}
+
+model Client {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  oid String @unique
+  name String
+  projects Project[]
+}
+
+model Project {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  adress String 
+  client Client @relation(fields: [id], references: [id]) 
+  startedAt DateTime
+  endedAt DateTime
+  attendance Attendance[]
+}
+
+model Attendance {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  employee User @relation(fields: [id], references: [id]) 
+  project Project @relation(fields: [id], references: [id])
+  date DateTime 
+  production String
+  payment Int 
+  notes String
 }
