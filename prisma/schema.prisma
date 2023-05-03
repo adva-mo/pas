@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+//todo check if a query return relations 
 
 generator client {
   provider = "prisma-client-js"
@@ -15,30 +14,34 @@ model User {
   oid String @unique
   name String
   password String
-  attendance Attendance[]
+  attendance Attendance[] @relation("attendance")
 }
 
 model Client {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
   oid String @unique
   name String
-  projects Project[]
+  projects Project[] @relation("projects")
 }
 
 model Project {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
   adress String 
-  client Client @relation(fields: [id], references: [id]) 
-  startedAt DateTime
-  endedAt DateTime
+  clientId String @db.ObjectId
+  client Client @relation("projects",fields: [clientId], references: [id]) 
+  startedAt String
+  endedAt String?
   attendance Attendance[]
 }
 
 model Attendance {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
-  employee User @relation(fields: [id], references: [id]) 
-  project Project @relation(fields: [id], references: [id])
-  date DateTime 
+  employeeId String @db.ObjectId
+  employee User @relation("attendance",fields: [employeeId], references: [id]) 
+  projectId String @db.ObjectId
+  project Project @relation(fields: [projectId], references: [id])
+  date String 
   production String
   payment Int 
   notes String
