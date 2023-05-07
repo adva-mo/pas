@@ -13,7 +13,6 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  console.log("posting projcet");
   try {
     const data = await req.json();
     //todo: send feedback of no body in req
