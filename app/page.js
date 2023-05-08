@@ -11,6 +11,7 @@ export default function Home() {
       <h2 className="mt-6"> שלום, {username}</h2>
       <div>
         <Link href={"/newattendance"}>הוסף נוכחות</Link>
+        <Link href={"/newproject"}>פתח פרוייקט</Link>
       </div>
     </main>
   );
