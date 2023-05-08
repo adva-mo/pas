@@ -10,7 +10,7 @@ export default function Home() {
       <Image src={logo} height={50} alt="Picture of the author" />
       <h2 className="mt-6"> שלום, {username}</h2>
       <div>
-        <Link href={"/about"}>הוסף נוכחות</Link>
+        <Link href={"/newattendance"}>הוסף נוכחות</Link>
       </div>
     </main>
   );
