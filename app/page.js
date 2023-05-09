@@ -9,9 +9,10 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center py-6">
       <Image src={logo} height={50} alt="Picture of the author" />
       <h2 className="mt-6"> שלום, {username}</h2>
-      <div>
+      <div className="flex flex-col">
         <Link href={"/newattendance"}>הוסף נוכחות</Link>
         <Link href={"/newproject"}>פתח פרוייקט</Link>
+        <Link href={"/newclient"}>הוסף לקוח</Link>
       </div>
     </main>
   );
