@@ -1,5 +1,3 @@
-//todo check if a query return relations 
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,7 +9,7 @@ datasource db {
 
 model User {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
-  oid String @unique
+  oid Int @unique
   name String
   password String
   attendance Attendance[] @relation("attendance")
@@ -19,7 +17,7 @@ model User {
 
 model Client {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
-  oid String @unique
+  oid Int @unique
   name String
   projects Project[] @relation("projects")
 }
@@ -44,5 +42,5 @@ model Attendance {
   date String 
   production String
   payment Int 
-  notes String
+  notes String?
 }
