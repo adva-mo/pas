@@ -8,7 +8,7 @@ async function newAttendance() {
 
   const [users, projects] = await Promise.all([usersData, projectsData]);
 
-  return <AttendanceForm users={users} projects={projects} />;
+  return <AttendanceForm users={users.users} projects={projects.projects} />;
 }
 
 export default newAttendance;

@@ -5,10 +5,10 @@ export async function GET(req) {
   try {
     const { users, error } = await getUsers();
     if (error) throw new Error(error);
-    return NextResponse.json(users);
+    return NextResponse.json({ users });
   } catch (error) {
     console.error(error.message);
-    return NextResponse.json(error.message);
+    return NextResponse.json({ error: error.message });
   }
 }
 
@@ -18,9 +18,9 @@ export async function POST(req) {
     //todo: send feedback of no body in req
     const { user, error } = await createUser(data);
     if (error) throw new Error(error);
-    return NextResponse.json(user);
+    return NextResponse.json({ user });
   } catch (error) {
     console.error(error.message);
-    return NextResponse.json(error.message);
+    return NextResponse.json({ error: error.message });
   }
 }
