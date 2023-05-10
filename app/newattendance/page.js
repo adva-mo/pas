@@ -1,35 +1,14 @@
-function newAttendance() {
-  return (
-    <form>
-      <div>
-        <label>עובד</label>
-        <select>בחר עובד</select>
-      </div>
-      <div>
-        <label>פרוייקט</label>
-        <select>בחר פרוייקט</select>
-      </div>
-      <div>
-        <label>תאריך</label>
-        <input />
-      </div>
-      <div>
-        <label>הספק</label>
-        <input />
-      </div>
-      <div>
-        <label>תשלום יומי</label>
-        <input typeof="number" />
-      </div>
-      <div>
-        <label>הערות</label>
-        <input />
-      </div>
-      <button>הוספה</button>
-    </form>
-  );
+import { getProjects } from "@/lib/prisma/projects";
+import { getUsers } from "@/lib/prisma/users";
+import AttendanceForm from "./AttendanceForm.js";
+
+async function newAttendance() {
+  const usersData = getUsers();
+  const projectsData = getProjects();
+
+  const [users, projects] = await Promise.all([usersData, projectsData]);
+
+  return <AttendanceForm users={users} projects={projects} />;
 }
 
 export default newAttendance;
-
-//fetch open projects and users
