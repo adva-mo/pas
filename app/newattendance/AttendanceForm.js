@@ -6,13 +6,20 @@ function AttendanceForm({ users, projects }) {
   const formRef = useRef();
 
   const saveAttendance = async () => {
-    const newAttendance = Object.fromEntries(new FormData(formRef.current));
-    formRef.current.reset();
-    const { data } = await axios.post("http://localhost:3000/api/attendance", {
-      ...newAttendance,
-      payment: Number(newAttendance.payment),
-    });
-    console.log(data);
+    try {
+      const newAttendance = Object.fromEntries(new FormData(formRef.current));
+      formRef.current.reset();
+      const { data } = await axios.post(
+        "http://localhost:3000/api/attendance",
+        {
+          ...newAttendance,
+          payment: Number(newAttendance.payment),
+        }
+      );
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
