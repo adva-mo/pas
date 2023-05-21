@@ -31,7 +31,7 @@ function AttendanceForm({ users, projects }) {
       <div>
         <select name="employeeId">
           <option>בחר עובד</option>
-          {users.map((user) => (
+          {users?.map((user) => (
             <option value={user.id}>{user.name} </option>
           ))}
         </select>
@@ -40,7 +40,7 @@ function AttendanceForm({ users, projects }) {
       <div>
         <select name="projectId">
           <option>בחר פרוייקט</option>
-          {projects.map((project) => (
+          {projects?.map((project) => (
             <option value={project.id}>{project.name}</option>
           ))}
         </select>
