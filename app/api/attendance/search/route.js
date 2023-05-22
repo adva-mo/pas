@@ -7,10 +7,15 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get("uid");
     const pid = searchParams.get("pid");
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
-    const filtered = await getAttendanceById(uid, pid, from, to);
+    const filtered = await getAttendanceById(
+      uid,
+      pid,
+      new Date(startDate),
+      new Date(endDate)
+    );
 
     return NextResponse.json({ attendances: filtered });
   } catch (error) {

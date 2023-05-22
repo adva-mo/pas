@@ -14,6 +14,7 @@ function AttendanceForm({ users, projects }) {
         {
           ...newAttendance,
           payment: Number(newAttendance.payment),
+          date: new Date(newAttendance.date),
         }
       );
       console.log(data);
