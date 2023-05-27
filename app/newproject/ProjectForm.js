@@ -43,7 +43,9 @@ function ProjectForm({ clients }) {
         <label htmlFor="startedAt">נפתח בתאריך</label>
         <input name="startedAt" />
       </div>
-      <button onClick={() => saveProject()}>שמירה</button>
+      <button className="btn-primary" onClick={() => saveProject()}>
+        שמירה
+      </button>
     </form>
   );
 }

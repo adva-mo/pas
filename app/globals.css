@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply bg-sky-400 py-4 w-full rounded-lg shadow-md text-white font-semibold hover:bg-sky-700;
+  }
+}

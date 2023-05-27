@@ -67,7 +67,9 @@ function AttendanceForm({ users, projects }) {
         <input name="notes" />
         <label htmlFor="notes">הערות</label>
       </div>
-      <button onClick={() => saveAttendance()}>שמירה</button>
+      <button className="btn-primary" onClick={() => saveAttendance()}>
+        שמירה
+      </button>
     </form>
   );
 }

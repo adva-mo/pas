@@ -32,7 +32,9 @@ function newClient() {
           <input name="name"></input>
           <label htmlFor="name">שם</label>
         </div>
-        <button onClick={() => saveClient()}>שמירה</button>
+        <button className="btn-primary" onClick={() => saveClient()}>
+          הוספה
+        </button>
       </form>
     </>
   );

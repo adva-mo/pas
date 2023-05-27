@@ -32,7 +32,9 @@ export default function newUser() {
           <input ref={oidRef} />
           <label>ת.ז.</label>
         </div>
-        <button onClick={() => saveUser()}>שמירה</button>
+        <button className="btn-primary" onClick={() => saveUser()}>
+          שמירה
+        </button>
       </form>
     </>
   );
