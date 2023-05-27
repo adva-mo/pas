@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRef } from "react";
+import PageHeader from "../UI/pageHeader/PageHeader.js";
 
 export default function newUser() {
   const oidRef = useRef();
@@ -20,16 +21,19 @@ export default function newUser() {
   };
 
   return (
-    <form className="text-right" onSubmit={(e) => e.preventDefault()}>
-      <div>
-        <input ref={nameRef} />
-        <label>שם</label>
-      </div>
-      <div>
-        <input ref={oidRef} />
-        <label>ת.ז.</label>
-      </div>
-      <button onClick={() => saveUser()}>שמירה</button>
-    </form>
+    <>
+      <PageHeader title="הוסף עובד"></PageHeader>
+      <form className="text-right" onSubmit={(e) => e.preventDefault()}>
+        <div>
+          <input ref={nameRef} />
+          <label>שם</label>
+        </div>
+        <div>
+          <input ref={oidRef} />
+          <label>ת.ז.</label>
+        </div>
+        <button onClick={() => saveUser()}>שמירה</button>
+      </form>
+    </>
   );
 }

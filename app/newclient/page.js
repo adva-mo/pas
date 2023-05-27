@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRef } from "react";
+import PageHeader from "../UI/pageHeader/PageHeader.js";
 
 function newClient() {
   const formRef = useRef();
@@ -20,17 +21,20 @@ function newClient() {
   };
 
   return (
-    <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
-      <div>
-        <input name="oid"></input>
-        <label htmlFor="oid">ח.פ.</label>
-      </div>
-      <div>
-        <input name="name"></input>
-        <label htmlFor="name">שם</label>
-      </div>
-      <button onClick={() => saveClient()}>שמירה</button>
-    </form>
+    <>
+      <PageHeader title="הוסף לקוח"></PageHeader>
+      <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
+        <div>
+          <input name="oid"></input>
+          <label htmlFor="oid">ח.פ.</label>
+        </div>
+        <div>
+          <input name="name"></input>
+          <label htmlFor="name">שם</label>
+        </div>
+        <button onClick={() => saveClient()}>שמירה</button>
+      </form>
+    </>
   );
 }
 export default newClient;
