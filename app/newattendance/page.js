@@ -1,7 +1,7 @@
 import { getProjects } from "@/lib/prisma/projects";
 import { getUsers } from "@/lib/prisma/users";
 import AttendanceForm from "./AttendanceForm.js";
-import PageHeader from "../UI/pageHeader/PageHeader.js";
+import PageHeader from "./UI/pageHeader/PageHeader.js";
 
 async function newAttendance() {
   const usersData = getUsers();
