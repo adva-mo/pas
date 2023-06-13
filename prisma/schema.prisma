@@ -7,40 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id  String @id @default(auto()) @map("_id") @db.ObjectId
-  oid Int @unique
-  name String
-  password String
-  attendance Attendance[] @relation("attendance")
+model Attendance {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  date       String
+  employeeId String @db.ObjectId
+  notes      String
+  payment    BigInt
+  production String
+  projectId  String @db.ObjectId
 }
 
 model Client {
-  id  String @id @default(auto()) @map("_id") @db.ObjectId
-  oid Int @unique
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String
-  projects Project[] @relation("projects")
+  oid  BigInt @unique
 }
 
 model Project {
-  id  String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  adress String 
-  clientId String @db.ObjectId
-  client Client @relation("projects",fields: [clientId], references: [id]) 
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  adress    String
+  clientId  String @db.ObjectId
+  name      String
   startedAt String
-  endedAt String?
-  attendance Attendance[]
 }
 
-model Attendance {
-  id  String @id @default(auto()) @map("_id") @db.ObjectId
-  employeeId String @db.ObjectId
-  employee User @relation("attendance",fields: [employeeId], references: [id]) 
-  projectId String @db.ObjectId
-  project Project @relation(fields: [projectId], references: [id])
-  date String 
-  production String
-  payment Int 
-  notes String?
+model User {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  oid      BigInt @unique
+  password String
 }
