@@ -20,7 +20,7 @@ export default function Home() {
         <Link href={"/newproject"}>פתח פרוייקט</Link>
         <Link href={"/newclient"}>הוסף לקוח</Link>
         <Link href={"/newuser"}>הוסף עובד</Link>
-        <Link href={"/"}>צפייה בדוחות</Link>
+        <Link href={"/reports"}>צפייה בדוחות</Link>
       </div>
     </main>
   );

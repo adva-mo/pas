@@ -9,12 +9,14 @@ export async function GET(request) {
     const pid = searchParams.get("pid");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    // console.log(uid);
+    // console.log(pid);
 
     const filtered = await searchAttendace(
       uid,
       pid,
-      new Date(startDate),
-      new Date(endDate)
+      startDate ? new Date(startDate) : null,
+      endDate ? new Date(endDate) : null
     );
 
     return NextResponse.json({ attendances: filtered });
