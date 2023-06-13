@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRef } from "react";
-import PageHeader from "../UI/pageHeader/PageHeader.js";
+import PageHeader from "./UI/pageHeader/PageHeader.js";
 
 function newClient() {
   const formRef = useRef();

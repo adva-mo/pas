@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRef } from "react";
-import PageHeader from "../UI/pageHeader/PageHeader.js";
+import PageHeader from "./UI/pageHeader/PageHeader.js";
 
 export default function newUser() {
   const oidRef = useRef();
