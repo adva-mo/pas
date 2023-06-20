@@ -18,25 +18,38 @@ export default function Home() {
         שלום, <span className="tracking-wide text-indigo-700 ">{username}</span>
       </h1>
 
-      <ul className="py-6 space-y-3">
-        <li className="px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200">
-          <Link href={"/newattendance"}>הוסף נוכחות</Link>
-        </li>
-        <li className="px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200">
-          {" "}
-          <Link href={"/newproject"}>פתח פרוייקט</Link>
-        </li>
-        <li className="px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200">
-          <Link href={"/newclient"}>הוסף לקוח</Link>
-        </li>
-        <li className="px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200">
-          {" "}
-          <Link href={"/newuser"}>הוסף עובד</Link>
-        </li>
-        <li className="px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200">
-          <Link href={"/reports"}>צפייה בדוחות</Link>
-        </li>
-      </ul>
+      <div className="py-6 space-y-3">
+        <Link
+          className=" block px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200"
+          href={"/newattendance"}
+        >
+          הוסף נוכחות
+        </Link>
+        <Link
+          className=" block px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200"
+          href={"/newproject"}
+        >
+          פתח פרוייקט
+        </Link>
+        <Link
+          className=" block px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200"
+          href={"/newclient"}
+        >
+          הוסף לקוח
+        </Link>{" "}
+        <Link
+          className=" block px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200"
+          href={"/newuser"}
+        >
+          הוסף עובד
+        </Link>
+        <Link
+          className=" block px-6 py-4 overflow-hidden bg-white rounded-md shadow min-w-[70vw] text-center hover:shadow-md hover:scale-105 ease-out duration-200"
+          href={"/reports"}
+        >
+          צפייה בדוחות
+        </Link>
+      </div>
     </main>
   );
 }
