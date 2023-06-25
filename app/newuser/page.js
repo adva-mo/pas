@@ -23,16 +23,39 @@ export default function newUser() {
   return (
     <>
       <PageHeader title="הוסף עובד"></PageHeader>
-      <form className="text-right" onSubmit={(e) => e.preventDefault()}>
+      <form
+        dir="ltr"
+        className="flex flex-col items-end max-w-screen-sm gap-3 p-4 mx-auto mt-4 font-sans text-lg rounded-md text-slate-800"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div>
-          <input ref={nameRef} />
-          <label>שם</label>
+          <label className="block font-semibold leading-4 text-right text-md text-slate-600">
+            שם
+          </label>
+          <input
+            className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+            dir="rtl"
+            ref={nameRef}
+            placeholder="שם העובד..."
+          />
         </div>
         <div>
-          <input ref={oidRef} />
-          <label>ת.ז.</label>
+          <label className="block font-semibold leading-4 text-right text-md text-slate-600">
+            ת.ז
+          </label>
+          <input
+            className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+            dir="rtl"
+            ref={oidRef}
+            placeholder="מספר זהות (כולל בפרת ביקורת)"
+            type="text"
+            pattern="\d*"
+          />
         </div>
-        <button className="btn-primary" onClick={() => saveUser()}>
+        <button
+          className="self-center my-4 transition-shadow duration-200 ease-in-out shadow-sm btn-primary hover:shadow-md focus:shadow-md active:shadow-sm"
+          onClick={() => saveUser()}
+        >
           שמירה
         </button>
       </form>

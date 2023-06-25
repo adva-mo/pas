@@ -23,16 +23,44 @@ function newClient() {
   return (
     <>
       <PageHeader title="הוסף לקוח"></PageHeader>
-      <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
+      <form
+        dir="ltr"
+        className="flex flex-col items-end max-w-screen-sm gap-3 p-4 mx-auto mt-4 font-sans text-lg rounded-md text-slate-800"
+        ref={formRef}
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div>
-          <input name="oid"></input>
-          <label htmlFor="oid">ח.פ.</label>
+          <label
+            className="block font-semibold leading-4 text-right text-md text-slate-600"
+            htmlFor="oid"
+          >
+            ח.פ.
+          </label>
+          <input
+            className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+            dir="rtl"
+            placeholder="מספר ח.פ..."
+            name="oid"
+          ></input>
         </div>
         <div>
-          <input name="name"></input>
-          <label htmlFor="name">שם</label>
+          <label
+            className="block font-semibold leading-4 text-right text-md text-slate-600"
+            htmlFor="name"
+          >
+            שם
+          </label>
+          <input
+            className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+            dir="rtl"
+            placeholder="שם הלקוח..."
+            name="name"
+          ></input>
         </div>
-        <button className="btn-primary" onClick={() => saveClient()}>
+        <button
+          className="self-center my-4 transition-shadow duration-200 ease-in-out shadow-sm btn-primary hover:shadow-md focus:shadow-md active:shadow-sm"
+          onClick={() => saveClient()}
+        >
           הוספה
         </button>
       </form>
