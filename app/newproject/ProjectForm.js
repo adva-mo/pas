@@ -20,30 +20,80 @@ function ProjectForm({ clients }) {
   };
 
   return (
-    <form onSubmit={(e) => e.preventDefault()} ref={formRef}>
+    <form
+      onSubmit={(e) => e.preventDefault()}
+      dir="ltr"
+      className="flex flex-col items-end max-w-screen-sm gap-3 p-4 mx-auto mt-4 font-sans text-lg rounded-md text-slate-800"
+      ref={formRef}
+    >
       <div>
         {clients && console.log(clients)}
-        <label htmlFor="name">name</label>
-        <input name="name" />
+        <label
+          className="block font-semibold leading-4 text-right text-md text-slate-600"
+          htmlFor="name"
+        >
+          פרוייקט
+        </label>
+        <input
+          className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+          dir="rtl"
+          name="name"
+          placeholder="שם הפרוייקט..."
+        />
       </div>
       <div>
-        <label htmlFor="adress">adress</label>
-        <input name="adress" />
+        <label
+          className="block font-semibold leading-4 text-right text-md text-slate-600"
+          htmlFor="adress"
+        >
+          כתובת
+        </label>
+        <input
+          className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+          name="adress"
+          dir="rtl"
+          placeholder="כתובת הפרוייקט..."
+        />
       </div>
       <div>
-        <label htmlFor="clientId">לקוח</label>
-        <select name="clientId">
-          <option value={"בחר לקוח"}>בחר לקוח</option>
+        <label
+          className="block font-semibold leading-4 text-right text-md text-slate-600"
+          htmlFor="clientId"
+        >
+          לקוח
+        </label>
+        <select
+          name="clientId"
+          dir="rtl"
+          className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+        >
+          <option className="w-32 px-2" value={"בחר לקוח"}>
+            בחר לקוח
+          </option>
           {clients?.map((c) => (
-            <option value={c.id}>{c.name}</option>
+            <option key={`${c.id}key`} className="w-32 px-2" value={c.id}>
+              {c.name}
+            </option>
           ))}
         </select>
       </div>
       <div>
-        <label htmlFor="startedAt">נפתח בתאריך</label>
-        <input name="startedAt" />
+        <label
+          className="block font-semibold leading-4 text-right text-md text-slate-600"
+          htmlFor="startedAt"
+        >
+          נפתח בתאריך
+        </label>
+        <input
+          className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-700"
+          name="startedAt"
+          type="date"
+        />
       </div>
-      <button className="btn-primary" onClick={() => saveProject()}>
+      <button
+        className="self-center my-4 transition-shadow duration-200 ease-in-out shadow-sm btn-primary hover:shadow-md focus:shadow-md active:shadow-sm"
+        onClick={() => saveProject()}
+      >
         שמירה
       </button>
     </form>
