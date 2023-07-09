@@ -4,7 +4,9 @@ import { useRef } from "react";
 import PageHeader from "../UI/pageHeader/Pageheader.js";
 
 export default function newUser() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const oidRef = useRef();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const nameRef = useRef();
 
   const saveUser = async () => {

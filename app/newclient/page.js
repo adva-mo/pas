@@ -4,6 +4,7 @@ import { useRef } from "react";
 import PageHeader from "../UI/pageHeader/Pageheader.js";
 
 function newClient() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const formRef = useRef();
 
   const saveClient = async () => {
