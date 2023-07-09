@@ -2,7 +2,7 @@ import Link from "next/link";
 
 function PageHeader({ title }) {
   return (
-    <nav className="bg-zinc-900">
+    <nav className="bg-zinc-900 w-full">
       <div className="flex items-center justify-between max-w-screen-sm gap-4 px-3 py-4 mx-auto font-sans text-xl text-white select-none bg-zinc-900 max-w-screen-smflex">
         <span className="px-1 pb-1 font-bold leading-none tracking-tighter rounded-sm shadow shadow-indigo-400/70 border-zinc-500 text-zinc-400">
           פ א ס
