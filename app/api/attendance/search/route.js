@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { searchAttendace } from "@/lib/prisma/attendance";
 
-//TODO convert this route to /search?uid=?pid
+//TODO fix issue with the dates
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -9,14 +9,13 @@ export async function GET(request) {
     const pid = searchParams.get("pid");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    // console.log(uid);
-    // console.log(pid);
 
     const filtered = await searchAttendace(
       uid,
       pid,
-      startDate ? new Date(startDate) : null,
-      endDate ? new Date(endDate) : null
+      "",
+      ""
+      // endDate ? new Date(endDate) : ""
     );
 
     return NextResponse.json({ attendances: filtered });
