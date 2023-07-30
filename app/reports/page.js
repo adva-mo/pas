@@ -17,14 +17,14 @@ async function reports() {
 
   const attendacesOfMonth = await searchAttendace("", "", firstDayOfMonth, "");
   return (
-    <>
+    <div className=" h-max">
       <PageHeader title={"דוחות"}></PageHeader>
       <ReportTable
         attendacesOfMonth={attendacesOfMonth}
         users={users.users}
         projects={projects.projects}
       />
-    </>
+    </div>
   );
 }
 
