@@ -31,7 +31,7 @@ npm run dev
 <div>
   <img 
   src="https://avatars.githubusercontent.com/u/112945511?v=4" 
-  style="width:65px; height:65px; border-radius:60px; display:inline-block; filter: drop-shadow(0 0 10px crimson);"/>
+  style="width:65px; height:65px; border-radius:60px; pointer-events:none; display:inline-block; filter:drop-shadow(0 0 10px #FF4000);"/>
   <div 
   style="display:inline-block">
 
@@ -47,7 +47,7 @@ npm run dev
 <div>
   <img 
   src="https://avatars.githubusercontent.com/u/110486620?v=4" 
-  style="width:55px; height:55px; margin: 5px; border-radius:60px; display:inline-block;filter: drop-shadow(0 0 10px crimson);"/>
+  style="width:55px; height:55px; margin:5px; border-radius:60px; display:inline-block; filter:drop-shadow(0 0 10px #FF4000);"/>
   <div 
   style="display:inline-block">
 
