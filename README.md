@@ -29,15 +29,16 @@ npm run dev
 ## Author
 
 <div>
+<h3>Adva Mozes</h3>
   <img 
   src="https://avatars.githubusercontent.com/u/112945511?v=4" 
-  style="width:65px; height:65px; border-radius:60px; pointer-events:none; display:inline-block; filter:drop-shadow(0 0 10px #FF4000);"/>
+  style="width:65px; height:65px; border-radius:60px; pointer-events:none; display:inline-block;"/>
   <div 
   style="display:inline-block">
 
-- [Adva Mozes (adva-mo @ GitHub)](https://github.com/adva-mo)
+- [adva-mo @ GitHub](https://github.com/adva-mo)
 
-- [Adva Mozes (Adva Mozes @ LinkedIn)](https://www.linkedin.com/in/adva-mozes/)
+- [Adva Mozes @ LinkedIn](https://www.linkedin.com/in/adva-mozes/)
 
   </div>
 </div>
@@ -45,15 +46,16 @@ npm run dev
 ## Contributers
 
 <div>
+<h3>Meir J Cohen</h3>
   <img 
   src="https://avatars.githubusercontent.com/u/110486620?v=4" 
-  style="width:55px; height:55px; margin:5px; border-radius:60px; display:inline-block; filter:drop-shadow(0 0 10px #FF4000);"/>
+  style="width:55px; height:55px; margin:5px; border-radius:60px; display:inline-block;"/>
   <div 
   style="display:inline-block">
 
-- [Meir J Cohen (MeirJC @ GitHub)](https://github.com/MeirJC)
+- [MeirJC @ GitHub](https://github.com/MeirJC)
 
-- [Meir J Cohen (Meir Josef Cohen @ LinkedIn)](https://www.linkedin.com/in/meirjcohen)
+- [Meir Josef Cohen @ LinkedIn](https://www.linkedin.com/in/meirjcohen)
 
   </div>
 </div>
