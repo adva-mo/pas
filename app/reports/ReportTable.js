@@ -18,7 +18,6 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
         projects={projects}
         setDataToDisplay={setDataToDisplay}
       />
-      {/* <div className="flow-root mx-2 mt-8"> */}
       <div className="flow-root mx-auto mt-8 overflow-x-auto ">
         <div className="inline-block min-w-full px-2 py-2 align-middle sm:px-6 lg:px-8">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
@@ -98,7 +97,6 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
           </div>
         </div>
       </div>
-      {/* </div> */}
     </div>
   );
 }
