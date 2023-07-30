@@ -22,15 +22,6 @@ npm run dev
 
 <small>Please notice the project uses a key as a `.env` file, To use it you must first connect it with your own personal MongoDB key</small>
 
-<!-- ## Usage
-
-- Create a new employee by clicking on the "Add Employee" button
-- Create a new project by clicking on the "Add Project" button
-- Assign employees to projects by clicking on the "Assign" button
-- View all employees by clicking on the "Employees" button
-- View all projects by clicking on the "Projects" button
-- View all workhours by clicking on the "Workhours" button -->
-
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
