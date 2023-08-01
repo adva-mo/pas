@@ -19,7 +19,14 @@ function SearchForm({ projects, users, setDataToDisplay }) {
       console.error(e);
     }
   };
-
+  // Get start and end date from date inputs
+  const setStartDate = (e) => {
+    console.log("Start date set to: ", e.target.value);
+  };
+  const setEndDate = (e) => {
+    console.log("End date set to: ", e.target.value);
+  };
+  // -------- Added 01-08-23 ----------
   return (
     <form dir="rtl" onSubmit={(e) => e.preventDefault()}>
       <h1 className="py-3 text-3xl font-bold tracking-wide text-center">
@@ -61,6 +68,7 @@ function SearchForm({ projects, users, setDataToDisplay }) {
               מתאריך
             </label>
             <input
+              onChange={(e) => setStartDate(e)}
               type="date"
               name="startDate"
               id="startDate"
@@ -75,6 +83,7 @@ function SearchForm({ projects, users, setDataToDisplay }) {
               עד תאריך
             </label>
             <input
+              onChange={(e) => setEndDate(e)}
               type="date"
               name="endDate"
               id="endDate"
