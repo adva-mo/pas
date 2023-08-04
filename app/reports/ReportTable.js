@@ -3,16 +3,31 @@ import React, { useState } from "react";
 import SearchForm from "./SearchForm";
 
 function ReportTable({ attendacesOfMonth, users, projects }) {
-  const [dataToDisplay, setDataToDisplay] = useState(attendacesOfMonth);
-
+  // Converted payment (bigInt to a number)
+  const [dataToDisplay, setDataToDisplay] = useState(
+    attendacesOfMonth.map((item) => {
+      item.payment = Number(item.payment);
+      return item;
+    })
+  );
+  // calculated the sum of all payments in table
+  const totalPayment = dataToDisplay.reduce((acc, item) => {
+    return acc + item.payment;
+  }, 0);
+  // # Question: Do we need a state to handle the sum change?
+  // console.log("totalPayment: ", totalPayment);
   const getUserName = (userId) => {
     return users.find((user) => user.id === userId).name;
   };
   const getProjectName = (projectId) => {
     return projects.find((project) => project.id === projectId).name;
   };
+  // console.log("dataToDisplay: ", dataToDisplay);
   return (
-    <div className="min-h-screen overflow-x-scroll sm:px-6 lg:px-8" dir="rtl">
+    <div
+      className="max-w-screen-sm min-h-screen px-2 mx-auto overflow-x-scroll sm:px-4 lg:px-8"
+      dir="rtl"
+    >
       <SearchForm
         users={users}
         projects={projects}
@@ -87,7 +102,7 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
                   </th>
                   <td>
                     <span className="text-base font-semi bold min-w-fit whitespace-nowrap text-slate-700">
-                      21,000
+                      {totalPayment}
                     </span>
                     &#8362;
                   </td>
