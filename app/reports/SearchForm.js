@@ -1,32 +1,24 @@
 "use client";
 import axios from "axios";
-import React, { useEffect, useRef } from "react";
+import React, { useState } from "react";
 
 function SearchForm({ projects, users, setDataToDisplay }) {
-  const userRef = useRef("");
-  const projectRef = useRef("");
+  const [employee, setEmployee] = useState("");
+  const [project, setProject] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const handleSearch = async () => {
     try {
       const { data } = await axios.get(
-        `/api/attendance/search?uid=${userRef.current.value || ""}&pid=${
-          projectRef.current.value || ""
-        }`
-        // &startDate=""&endDate=""`
+        `/api/attendance/search?uid=${employee}&pid=${project}&startDate=${startDate}&endDate=${endDate}`
       );
-      console.log(data.attendances);
+      setDataToDisplay(data.attendances);
     } catch (e) {
       console.error(e);
     }
   };
-  // Get start and end date from date inputs
-  const setStartDate = (e) => {
-    console.log("Start date set to: ", e.target.value);
-  };
-  const setEndDate = (e) => {
-    console.log("End date set to: ", e.target.value);
-  };
-  // -------- Added 01-08-23 ----------
+
   return (
     <form dir="rtl" onSubmit={(e) => e.preventDefault()}>
       <h1 className="py-3 text-3xl font-bold tracking-wide text-center">
@@ -37,28 +29,34 @@ function SearchForm({ projects, users, setDataToDisplay }) {
           dir="rtl"
           name="projectId"
           className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-700"
-          ref={projectRef}
+          onChange={(e) => setProject(e.target.value)}
         >
-          <option className="w-32 px-2">לפי פרוייקט</option>
+          <option className="w-32 px-2" value={""}>
+            לפי פרוייקט
+          </option>
           {projects?.map((project) => (
             <option className="w-32 px-2" key={project.id} value={project.id}>
               {project.name}
             </option>
           ))}
         </select>
+
         <select
           name="employeeId"
           dir="rtl"
           className="block w-full min-w-[256px] py-2 px-3 mt-2  border rounded-md ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-700"
-          ref={userRef}
+          onChange={(e) => setEmployee(e.target.value)}
         >
-          <option className="w-32 px-2">בחר עובד</option>
+          <option className="w-32 px-2" value={""}>
+            בחר עובד
+          </option>
           {users?.map((user) => (
             <option className="w-32 px-2" key={user.id} value={user.id}>
               {user.name}{" "}
             </option>
           ))}
         </select>
+
         <div className="grid items-center w-full grid-cols-1 md:grid-cols-2 justify-evenly">
           <div className="flex items-center justify-between w-full col-span-1">
             <label
@@ -68,7 +66,7 @@ function SearchForm({ projects, users, setDataToDisplay }) {
               מתאריך
             </label>
             <input
-              onChange={(e) => setStartDate(e)}
+              onChange={(e) => setStartDate(e.target.value)}
               type="date"
               name="startDate"
               id="startDate"
@@ -83,7 +81,7 @@ function SearchForm({ projects, users, setDataToDisplay }) {
               עד תאריך
             </label>
             <input
-              onChange={(e) => setEndDate(e)}
+              onChange={(e) => setEndDate(e.target.value)}
               type="date"
               name="endDate"
               id="endDate"
