@@ -3,7 +3,7 @@ import axios from "axios";
 import { useRef } from "react";
 import PageHeader from "../UI/pageHeader/Pageheader.js";
 
-function newClient() {
+function NewClient() {
   const formRef = useRef();
 
   const saveClient = async () => {
@@ -66,4 +66,4 @@ function newClient() {
     </>
   );
 }
-export default newClient;
+export default NewClient;

@@ -4,7 +4,7 @@ import { getUsers } from "@/lib/prisma/users";
 import { getProjects } from "@/lib/prisma/projects";
 import ReportTable from "./ReportTable";
 
-async function reports() {
+async function Reports() {
   const usersData = getUsers();
   const projectsData = getProjects();
   const [users, projects] = await Promise.all([usersData, projectsData]);
@@ -28,4 +28,4 @@ async function reports() {
   );
 }
 
-export default reports;
+export default Reports;

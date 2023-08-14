@@ -2,7 +2,7 @@ import { getClients } from "@/lib/prisma/clients";
 import ProjectForm from "./ProjectForm";
 import PageHeader from "../UI/pageHeader/Pageheader";
 
-async function newProject() {
+async function NewProject() {
   const clients = await getClients();
 
   return (
@@ -13,4 +13,4 @@ async function newProject() {
   );
 }
 
-export default newProject;
+export default NewProject;

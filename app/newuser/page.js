@@ -3,7 +3,7 @@ import axios from "axios";
 import { useRef } from "react";
 import PageHeader from "../UI/pageHeader/Pageheader.js";
 
-export default function newUser() {
+export default function NewUser() {
   const oidRef = useRef();
   const nameRef = useRef();
 
