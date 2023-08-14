@@ -7,16 +7,13 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get("uid");
     const pid = searchParams.get("pid");
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
+    let startDate = searchParams.get("startDate");
+    let endDate = searchParams.get("endDate");
 
-    const filtered = await searchAttendace(
-      uid,
-      pid,
-      "",
-      ""
-      // endDate ? new Date(endDate) : ""
-    );
+    startDate = startDate ? new Date(startDate) : null;
+    endDate = endDate ? new Date(endDate) : null;
+
+    const filtered = await searchAttendace(uid, pid, startDate, endDate);
 
     return NextResponse.json({ attendances: filtered });
   } catch (error) {
