@@ -8,21 +8,15 @@ function AttendanceForm({ users, projects }) {
   const saveAttendance = async () => {
     try {
       const newAttendance = Object.fromEntries(new FormData(formRef.current));
-      formRef.current.reset();
       const dataToSend = {
         ...newAttendance,
         payment: parseInt(newAttendance.payment),
         date: new Date(newAttendance.date),
       };
-      // console.log("newAttendance: ", newAttendance);
-      // console.log("dataToSend: ", dataToSend);
-      const { data } = await axios.post(
-        "http://localhost:3000/api/attendance",
-        {
-          ...dataToSend,
-        }
-      );
-      console.log(data);
+      await axios.post("http://localhost:3000/api/attendance", {
+        ...dataToSend,
+      });
+      formRef.current.reset();
     } catch (error) {
       console.log(error);
     }
