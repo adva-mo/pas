@@ -4,13 +4,13 @@ import SearchForm from "./SearchForm";
 
 function ReportTable({ attendacesOfMonth, users, projects }) {
   const [dataToDisplay, setDataToDisplay] = useState(
-    attendacesOfMonth.map((item) => {
+    attendacesOfMonth?.map((item) => {
       item.payment = Number(item.payment);
       return item;
     })
   );
 
-  const totalPayment = dataToDisplay.reduce((acc, item) => {
+  const totalPayment = dataToDisplay?.reduce((acc, item) => {
     return acc + item.payment;
   }, 0);
 
@@ -76,7 +76,7 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {dataToDisplay.map((attendance) => (
+                {dataToDisplay?.map((attendance) => (
                   <tr key={attendance.id}>
                     <td className="py-4 pl-4 pr-3 text-sm font-medium whitespace-nowrap min-w-fit text-slate-900 ">
                       {getUserName(attendance.employeeId)}
@@ -86,7 +86,6 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
                     </td>
                     <td className="px-3 py-4 text-sm whitespace-nowrap min-w-fit text-slate-500">
                       {attendance.date.split("T")[0]}
-                      {/* {attendance.date.toLocaleDateString()} */}
                     </td>
                     <td className="px-3 py-4 text-sm whitespace-nowrap min-w-fit text-slate-500">
                       {attendance.production}
@@ -111,7 +110,7 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
                   </th>
                   <td>
                     <span className="text-base font-semi bold min-w-fit whitespace-nowrap text-slate-700">
-                      {totalPayment}
+                      {totalPayment || 0}
                     </span>
                     &#8362;
                   </td>
