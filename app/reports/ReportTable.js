@@ -3,26 +3,24 @@ import React, { useState } from "react";
 import SearchForm from "./SearchForm";
 
 function ReportTable({ attendacesOfMonth, users, projects }) {
-  // Converted payment (bigInt to a number)
   const [dataToDisplay, setDataToDisplay] = useState(
     attendacesOfMonth.map((item) => {
       item.payment = Number(item.payment);
       return item;
     })
   );
-  // calculated the sum of all payments in table
+
   const totalPayment = dataToDisplay.reduce((acc, item) => {
     return acc + item.payment;
   }, 0);
-  // # Question: Do we need a state to handle the sum change?
-  // console.log("totalPayment: ", totalPayment);
+
   const getUserName = (userId) => {
     return users.find((user) => user.id === userId).name;
   };
   const getProjectName = (projectId) => {
     return projects.find((project) => project.id === projectId).name;
   };
-  // console.log("dataToDisplay: ", dataToDisplay);
+
   return (
     <div
       className="max-w-screen-sm min-h-screen px-2 mx-auto overflow-x-scroll sm:px-4 lg:px-8"
@@ -55,6 +53,12 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
                     scope="col"
                     className="px-3 py-3.5 text-start text-sm font-semibold min-w-fit text-slate-900"
                   >
+                    תאריך
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-start text-sm font-semibold min-w-fit text-slate-900"
+                  >
                     מספר גלישות
                   </th>
                   <th
@@ -81,6 +85,10 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
                       {getProjectName(attendance.projectId)}
                     </td>
                     <td className="px-3 py-4 text-sm whitespace-nowrap min-w-fit text-slate-500">
+                      {attendance.date.split("T")[0]}
+                      {/* {attendance.date.toLocaleDateString()} */}
+                    </td>
+                    <td className="px-3 py-4 text-sm whitespace-nowrap min-w-fit text-slate-500">
                       {attendance.production}
                     </td>
                     <td className="px-3 py-4 text-sm whitespace-nowrap min-w-fit text-slate-500">
@@ -94,6 +102,7 @@ function ReportTable({ attendacesOfMonth, users, projects }) {
               </tbody>
               <tfoot>
                 <tr>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
