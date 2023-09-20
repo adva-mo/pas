@@ -23,7 +23,7 @@ function ProjectForm({ clients }) {
       ref={formRef}
     >
       <div>
-        {clients && console.log(clients)}
+        {/* {clients && console.log(clients)} */}
         <label
           className="block font-semibold leading-4 text-right text-md text-slate-600"
           htmlFor="name"
