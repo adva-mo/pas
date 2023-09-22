@@ -13,7 +13,7 @@ function AttendanceForm({ users, projects }) {
         payment: parseInt(newAttendance.payment),
         date: new Date(newAttendance.date),
       };
-      await axios.post("http://localhost:3000/api/attendance", {
+      await axios.post(`${process.env.BASE_URL}/api/attendance`, {
         ...dataToSend,
       });
       formRef.current.reset();

@@ -14,7 +14,7 @@ export default function NewUser() {
         name: nameRef.current.value,
         password: oidRef.current.value,
       };
-      await axios.post("http://localhost:3000/api/users", newUser);
+      await axios.post(`${process.env.BASE_URL}/api/users`, newUser);
       nameRef.current.value = "";
       oidRef.current.value = "";
     } catch (e) {

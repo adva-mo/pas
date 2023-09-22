@@ -9,7 +9,7 @@ function NewClient() {
   const saveClient = async () => {
     try {
       const newClient = Object.fromEntries(new FormData(formRef.current));
-      await axios.post("http://localhost:3000/api/clients", {
+      await axios.post(`${process.env.BASE_URL}/api/clients`, {
         ...newClient,
         oid: Number(newClient.oid),
       });
