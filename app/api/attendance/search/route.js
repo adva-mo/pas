@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { searchAttendace } from "@/lib/prisma/attendance";
 
 //TODO fix issue with the dates
-export async function GET(request) {
+export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const uid = searchParams.get("uid");
