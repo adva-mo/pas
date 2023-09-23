@@ -4,7 +4,7 @@ import { searchAttendace } from "@/lib/prisma/attendance";
 //TODO fix issue with the dates
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(req.url);
     const uid = searchParams.get("uid");
     const pid = searchParams.get("pid");
     let startDate = searchParams.get("startDate");
