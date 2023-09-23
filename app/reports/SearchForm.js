@@ -11,7 +11,7 @@ function SearchForm({ projects, users, setDataToDisplay }) {
   const handleSearch = async () => {
     try {
       const { data } = await axios.get(
-        `/api/attendance/search?uid=${employee}&pid=${project}&startDate=${startDate}&endDate=${endDate}`
+        `https://pas-app-orpin.vercel.app/api/attendance/search?uid=${employee}&pid=${project}&startDate=${startDate}&endDate=${endDate}`
       );
       setDataToDisplay(data.attendances);
     } catch (e) {
