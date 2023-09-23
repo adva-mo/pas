@@ -9,7 +9,7 @@ function NewClient() {
   const saveClient = async () => {
     try {
       const newClient = Object.fromEntries(new FormData(formRef.current));
-      await axios.post(`${process.env.BASE_URL}/api/clients`, {
+      await axios.post(`https://pas-app-orpin.vercel.app/api/clients`, {
         ...newClient,
         oid: Number(newClient.oid),
       });

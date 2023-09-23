@@ -14,7 +14,7 @@ export default function NewUser() {
         name: nameRef.current.value,
         password: oidRef.current.value,
       };
-      await axios.post(`${process.env.BASE_URL}/api/users`, newUser);
+      await axios.post(`https://pas-app-orpin.vercel.app/api/users`, newUser);
       nameRef.current.value = "";
       oidRef.current.value = "";
     } catch (e) {

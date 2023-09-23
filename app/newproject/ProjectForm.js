@@ -8,7 +8,10 @@ function ProjectForm({ clients }) {
   const saveProject = async () => {
     try {
       const newProject = Object.fromEntries(new FormData(formRef.current));
-      await axios.post(`${process.env.BASE_URL}/api/projects`, newProject);
+      await axios.post(
+        `https://pas-app-orpin.vercel.app/api/projects`,
+        newProject
+      );
       formRef.current.reset();
     } catch (error) {
       console.log(error);
