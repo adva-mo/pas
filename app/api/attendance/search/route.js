@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { searchAttendace } from "@/lib/prisma/attendance";
-
-//TODO fix issue with the dates
+export const dynamic = "force-dynamic";
 export async function GET(req) {
   try {
+    const url = new URL(req.url);
+
+    const skip = url.searchParams.get("skip");
+    const take = url.searchParams.get("take");
+
     const { searchParams } = new URL(req.url);
     const uid = searchParams.get("uid");
     const pid = searchParams.get("pid");
