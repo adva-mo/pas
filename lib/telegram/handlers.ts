@@ -36,15 +36,20 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from.id
     const db = createSupabaseServiceClient()
 
-    const { data: employee } = await db
+    const { data: employee, error: empError } = await db
       .from('employees')
       .select('id, name')
       .eq('telegram_user_id', telegramUserId)
       .eq('is_active', true)
       .maybeSingle()
 
+    if (empError) {
+      await ctx.reply(`DB error: ${empError.message}`)
+      return
+    }
+
     if (!employee) {
-      await ctx.reply('You are not registered in the system. Contact your manager.')
+      await ctx.reply(`Not found. Your Telegram ID: ${telegramUserId}`)
       return
     }
 
