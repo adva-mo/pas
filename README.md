@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PAS — Daily Work Reporting System
 
-## Getting Started
+Employees submit daily reports via a Telegram bot. Admins review them on a mobile-first web dashboard.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 16** (App Router) — frontend + API routes
+- **Supabase** — Postgres database + Auth
+- **Telegraf** — Telegram bot (webhook-based)
+- **Vercel** — hosting
+
+---
+
+## Setup
+
+### 1. Supabase project
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the contents of `supabase/migrations/001_initial.sql`
+3. Go to **Authentication → Providers** — Email is already enabled by default
+4. Create the first admin user:
+   - Go to **Authentication → Users → Add user**
+   - Enter the admin email and password
+   - Copy the new user's UUID
+5. Insert the admin record in **Table Editor → admins**:
+   ```sql
+   INSERT INTO admins (user_id) VALUES ('<admin-uuid-here>');
+   ```
+6. Collect the credentials from **Project Settings → API**:
+   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon public` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `service_role secret` → `SUPABASE_SERVICE_ROLE_KEY`
+
+### 2. Telegram bot
+
+1. Message [@BotFather](https://t.me/BotFather) on Telegram
+2. `/newbot` → follow the prompts → copy the token → `TELEGRAM_BOT_TOKEN`
+3. Generate a random secret string → `TELEGRAM_WEBHOOK_SECRET` (e.g. `openssl rand -hex 32`)
+4. After deploying (step 5), register the webhook:
+   ```
+   curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://<your-domain>/api/telegram/webhook&secret_token=<WEBHOOK_SECRET>"
+   ```
+
+### 3. Environment variables
+
+Copy `.env.example` to `.env.local` and fill in the values:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_WEBHOOK_SECRET=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 4. Local development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The app runs at `http://localhost:3000`.
 
-## Learn More
+For local bot testing, use [ngrok](https://ngrok.com) to expose localhost:
+```bash
+ngrok http 3000
+# then register the webhook with the ngrok URL
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 5. Deploy to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Connect the GitHub repo in the Vercel dashboard, set the environment variables, and deploy. Or:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+vercel --prod
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Employee onboarding
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Admin adds the employee in the dashboard (Employees page)
+2. Admin needs the employee's Telegram user ID — employee can get it by messaging [@userinfobot](https://t.me/userinfobot)
+3. Employee opens the bot and sends `/start`
+
+---
+
+## Admin dashboard
+
+| Page | URL |
+|---|---|
+| Reports | `/reports` |
+| Report detail / edit | `/reports/<id>` |
+| Employees | `/employees` |
+| Projects | `/projects` |
+
+### Projects setup
+
+Before employees can submit reports, add projects on the Projects page. Set `sort_order` to control the order in the bot keyboard (lower = first). The migration seeds two example projects (Office, Remote) — edit or delete them as needed.
+
+---
+
+## Bot flow
+
+```
+/start
+  → "Where did you work today?" [Project buttons]
+  → Employee taps a project
+  → "What did you do?"
+  → Employee types work description
+  → "Any notes?" [Skip button]
+  → Employee types notes or taps Skip
+  → Summary shown + [✓ Confirm] [↩ Start Over]
+  → "Report saved. ✓"
+```
+
+---
+
+## Notes
+
+- One report per employee per day is enforced at the database level
+- Employees cannot edit or delete submitted reports; only admin can
+- Admin can edit any report, add internal notes, change status, or delete
+- Deactivating a project removes it from the bot keyboard; historical reports are unaffected (name is stored as a snapshot)
+- Timezone: `work_date` defaults to UTC. If employees are in a different timezone, adjust the date logic in `lib/telegram/handlers.ts`
