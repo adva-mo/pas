@@ -6,7 +6,6 @@ export default async function ProjectsPage() {
   const { data: projects } = await db
     .from('projects')
     .select('*')
-    .order('sort_order')
     .order('name')
 
   return (

@@ -14,10 +14,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const db = createSupabaseServiceClient()
 
-  const { error } = await db.from('projects').insert({
-    name: body.name,
-    sort_order: body.sort_order ?? 0,
-  })
+  const { error } = await db.from('projects').insert({ name: body.name })
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'A project with this name already exists' }, { status: 409 })

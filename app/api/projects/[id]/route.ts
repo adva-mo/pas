@@ -18,7 +18,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const update: Record<string, unknown> = {}
   if (body.name !== undefined) update.name = body.name
   if (body.is_active !== undefined) update.is_active = body.is_active
-  if (body.sort_order !== undefined) update.sort_order = body.sort_order
 
   const { error } = await db.from('projects').update(update).eq('id', id)
   if (error) {

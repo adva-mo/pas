@@ -15,7 +15,7 @@ export default async function ReportDetailPage({ params }: Props) {
 
   const [reportRes, projectsRes] = await Promise.all([
     db.from('daily_reports').select('*, employees(id, name)').eq('id', id).maybeSingle(),
-    db.from('projects').select('id, name').eq('is_active', true).order('sort_order').order('name'),
+    db.from('projects').select('id, name').eq('is_active', true).order('name'),
   ]) as [
     { data: ReportWithEmployee | null },
     { data: { id: string; name: string }[] | null },

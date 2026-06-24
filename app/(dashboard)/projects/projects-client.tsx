@@ -7,7 +7,7 @@ import type { Project } from '@/lib/supabase/types'
 export default function ProjectsClient({ projects }: { projects: Project[] }) {
   const router = useRouter()
   const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({ name: '', sort_order: '' })
+  const [form, setForm] = useState({ name: '' })
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -21,10 +21,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
     const res = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: form.name.trim(),
-        sort_order: form.sort_order ? Number(form.sort_order) : 0,
-      }),
+      body: JSON.stringify({ name: form.name.trim() }),
     })
 
     setAdding(false)
@@ -33,7 +30,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
       setError(data.error ?? 'Failed to add project')
       return
     }
-    setForm({ name: '', sort_order: '' })
+    setForm({ name: '' })
     setShowAdd(false)
     router.refresh()
   }
@@ -86,16 +83,6 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                 placeholder="לדוגמה: מגדל בבלי"
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">סדר מיון</label>
-              <input
-                type="number"
-                placeholder="0 = ראשון (נמוך יותר = עדיפות גבוהה)"
-                value={form.sort_order}
-                onChange={e => setForm(f => ({ ...f, sort_order: e.target.value }))}
                 className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -156,7 +143,6 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                       )}
                     </div>
                   )}
-                  <p className="text-xs text-gray-400 mt-0.5">סדר: {p.sort_order}</p>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">

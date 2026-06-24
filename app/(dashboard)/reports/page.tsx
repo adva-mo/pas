@@ -37,7 +37,7 @@ export default async function ReportsPage({ searchParams }: Props) {
 
   const [{ data: employees }, { data: projects }] = await Promise.all([
     db.from('employees').select('id, name').eq('is_active', true).order('name'),
-    db.from('projects').select('id, name').eq('is_active', true).order('sort_order').order('name'),
+    db.from('projects').select('id, name').eq('is_active', true).order('name'),
   ]) as [
     { data: { id: string; name: string }[] | null },
     { data: { id: string; name: string }[] | null },

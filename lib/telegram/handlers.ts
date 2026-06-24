@@ -19,7 +19,6 @@ async function askProject(ctx: BotContext) {
     .from('projects')
     .select('id, name')
     .eq('is_active', true)
-    .order('sort_order')
     .order('name')
 
   if (!projects || projects.length === 0) {

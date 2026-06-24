@@ -19,7 +19,6 @@ export interface Database {
           id: string
           name: string
           is_active: boolean
-          sort_order: number
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['projects']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string }
