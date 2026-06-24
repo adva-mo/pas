@@ -45,7 +45,7 @@ export default function ReportEditForm({ report, projects }: Props) {
     })
 
     setSaving(false)
-    if (!res.ok) { setError('Failed to save. Please try again.'); return }
+    if (!res.ok) { setError('שגיאה בשמירה. נסה שוב.'); return }
     router.push('/reports')
     router.refresh()
   }
@@ -54,7 +54,7 @@ export default function ReportEditForm({ report, projects }: Props) {
     setDeleting(true)
     const res = await fetch(`/api/reports/${report.id}`, { method: 'DELETE' })
     setDeleting(false)
-    if (!res.ok) { setError('Failed to delete. Please try again.'); return }
+    if (!res.ok) { setError('שגיאה במחיקה. נסה שוב.'); return }
     router.push('/reports')
     router.refresh()
   }
@@ -63,23 +63,23 @@ export default function ReportEditForm({ report, projects }: Props) {
     <form onSubmit={handleSave} className="space-y-5">
       {/* Project */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Project</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">פרויקט</label>
         <select
           value={form.project_id}
           onChange={e => setForm(f => ({ ...f, project_id: e.target.value }))}
           className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         >
-          <option value="">— select project —</option>
+          <option value="">— בחר פרויקט —</option>
           {projects.map(p => (
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
-        <p className="text-xs text-gray-400 mt-1">Current: {report.location}</p>
+        <p className="text-xs text-gray-400 mt-1">נוכחי: {report.location}</p>
       </div>
 
       {/* Work description */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Work description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">תיאור עבודה</label>
         <textarea
           required
           rows={4}
@@ -91,31 +91,31 @@ export default function ReportEditForm({ report, projects }: Props) {
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">הערות</label>
         <textarea
           rows={2}
           value={form.notes}
           onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-          placeholder="Optional"
+          placeholder="אופציונלי"
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />
       </div>
 
       {/* Admin notes */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Admin notes</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">הערות מנהל</label>
         <textarea
           rows={2}
           value={form.admin_notes}
           onChange={e => setForm(f => ({ ...f, admin_notes: e.target.value }))}
-          placeholder="Internal notes (not visible to employee)"
+          placeholder="הערות פנימיות (לא גלויות לעובד)"
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />
       </div>
 
       {/* Status */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">סטטוס</label>
         <div className="flex gap-3">
           {(['submitted', 'reviewed'] as const).map(s => (
             <button
@@ -128,7 +128,7 @@ export default function ReportEditForm({ report, projects }: Props) {
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
+              {s === 'submitted' ? 'הוגש' : 'נבדק'}
             </button>
           ))}
         </div>
@@ -145,7 +145,7 @@ export default function ReportEditForm({ report, projects }: Props) {
           disabled={saving}
           className="w-full h-12 bg-blue-600 text-white rounded-xl text-base font-medium hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 transition-colors"
         >
-          {saving ? 'Saving…' : 'Save changes'}
+          {saving ? 'שומר...' : 'שמור שינויים'}
         </button>
 
         {!confirmDelete ? (
@@ -154,18 +154,18 @@ export default function ReportEditForm({ report, projects }: Props) {
             onClick={() => setConfirmDelete(true)}
             className="w-full h-12 bg-white border border-red-300 text-red-600 rounded-xl text-base font-medium hover:bg-red-50 active:bg-red-100 transition-colors"
           >
-            Delete report
+            מחק דוח
           </button>
         ) : (
           <div className="border border-red-300 rounded-xl p-4 space-y-3">
-            <p className="text-sm text-red-700 font-medium text-center">Delete this report permanently?</p>
+            <p className="text-sm text-red-700 font-medium text-center">למחוק את הדוח לצמיתות?</p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
                 className="flex-1 h-11 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-medium"
               >
-                Cancel
+                ביטול
               </button>
               <button
                 type="button"
@@ -173,7 +173,7 @@ export default function ReportEditForm({ report, projects }: Props) {
                 disabled={deleting}
                 className="flex-1 h-11 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50"
               >
-                {deleting ? 'Deleting…' : 'Yes, delete'}
+                {deleting ? 'מוחק...' : 'כן, מחק'}
               </button>
             </div>
           </div>

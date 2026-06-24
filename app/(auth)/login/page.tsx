@@ -20,7 +20,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError('Invalid email or password')
+      setError('אימייל או סיסמה שגויים')
       setLoading(false)
       return
     }
@@ -33,13 +33,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Admin Login</h1>
-          <p className="text-sm text-gray-500 mb-8">Daily Reports Dashboard</p>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">כניסת מנהל</h1>
+          <p className="text-sm text-gray-500 mb-8">מערכת דוחות יומיים</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Email
+                אימייל
               </label>
               <input
                 id="email"
@@ -55,7 +55,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Password
+                סיסמה
               </label>
               <input
                 id="password"
@@ -80,7 +80,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full h-12 bg-blue-600 text-white rounded-xl text-base font-medium hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? 'מתחבר...' : 'כניסה'}
             </button>
           </form>
         </div>

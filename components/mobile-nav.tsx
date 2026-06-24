@@ -6,9 +6,9 @@ import { useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
 const NAV_LINKS = [
-  { href: '/reports', label: 'Reports' },
-  { href: '/employees', label: 'Employees' },
-  { href: '/projects', label: 'Projects' },
+  { href: '/reports', label: 'דוחות' },
+  { href: '/employees', label: 'עובדים' },
+  { href: '/projects', label: 'פרויקטים' },
 ]
 
 export default function MobileNav() {
@@ -69,7 +69,7 @@ export default function MobileNav() {
                 onClick={handleSignOut}
                 className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-medium"
               >
-                Sign out
+                התנתקות
               </button>
             </div>
           </div>

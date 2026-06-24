@@ -57,7 +57,7 @@ export default function FiltersBar({ employees, projects, current }: Props) {
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 8h10M11 12h2" />
         </svg>
-        Filter
+        סינון
         {activeCount > 0 && (
           <span className="bg-blue-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
             {activeCount}
@@ -69,10 +69,10 @@ export default function FiltersBar({ employees, projects, current }: Props) {
         <div className="mt-2 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-4">
           {/* Search */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Search</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">חיפוש</label>
             <input
               type="text"
-              placeholder="Work description, location, notes…"
+              placeholder="תיאור עבודה, מיקום, הערות..."
               value={form.q}
               onChange={e => setForm(f => ({ ...f, q: e.target.value }))}
               className="w-full h-10 px-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -82,7 +82,7 @@ export default function FiltersBar({ employees, projects, current }: Props) {
           {/* Date range */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">מתאריך</label>
               <input
                 type="date"
                 value={form.date_from}
@@ -91,7 +91,7 @@ export default function FiltersBar({ employees, projects, current }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">עד תאריך</label>
               <input
                 type="date"
                 value={form.date_to}
@@ -103,13 +103,13 @@ export default function FiltersBar({ employees, projects, current }: Props) {
 
           {/* Employee */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Employee</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">עובד</label>
             <select
               value={form.employee}
               onChange={e => setForm(f => ({ ...f, employee: e.target.value }))}
               className="w-full h-10 px-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
-              <option value="">All employees</option>
+              <option value="">כל העובדים</option>
               {employees.map(e => (
                 <option key={e.id} value={e.id}>{e.name}</option>
               ))}
@@ -118,13 +118,13 @@ export default function FiltersBar({ employees, projects, current }: Props) {
 
           {/* Project */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Project</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">פרויקט</label>
             <select
               value={form.project}
               onChange={e => setForm(f => ({ ...f, project: e.target.value }))}
               className="w-full h-10 px-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
-              <option value="">All projects</option>
+              <option value="">כל הפרויקטים</option>
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
@@ -137,14 +137,14 @@ export default function FiltersBar({ employees, projects, current }: Props) {
               onClick={apply}
               className="flex-1 h-11 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 active:bg-blue-800"
             >
-              Apply
+              החל
             </button>
             {activeCount > 0 && (
               <button
                 onClick={clear}
                 className="h-11 px-4 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200"
               >
-                Clear
+                נקה
               </button>
             )}
           </div>

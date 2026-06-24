@@ -22,7 +22,7 @@ export default function ReportCard({ report }: Props) {
             ? 'bg-green-100 text-green-700'
             : 'bg-yellow-100 text-yellow-700'
         }`}>
-          {report.status === 'reviewed' ? 'Reviewed' : 'Submitted'}
+          {report.status === 'reviewed' ? 'נבדק' : 'הוגש'}
         </span>
       </div>
 
@@ -34,7 +34,7 @@ export default function ReportCard({ report }: Props) {
 
       {report.admin_notes && (
         <div className="bg-blue-50 rounded-lg px-3 py-2">
-          <p className="text-xs text-blue-600 font-medium mb-0.5">Admin note</p>
+          <p className="text-xs text-blue-600 font-medium mb-0.5">הערת מנהל</p>
           <p className="text-xs text-blue-800">{report.admin_notes}</p>
         </div>
       )}
@@ -43,7 +43,7 @@ export default function ReportCard({ report }: Props) {
         href={`/reports/${report.id}`}
         className="block text-center w-full h-10 leading-10 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-xl text-sm font-medium text-gray-700 transition-colors"
       >
-        Edit
+        עריכה
       </Link>
     </div>
   )

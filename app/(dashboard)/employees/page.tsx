@@ -11,7 +11,7 @@ export default async function EmployeesPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">Employees</h1>
+        <h1 className="text-xl font-semibold text-gray-900">עובדים</h1>
       </div>
       <EmployeesClient employees={employees ?? []} />
     </div>

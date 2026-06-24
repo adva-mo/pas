@@ -55,20 +55,20 @@ export default async function ReportsPage({ searchParams }: Props) {
     <div className="space-y-5">
       {/* Today's status widget */}
       <div className="bg-white rounded-2xl border border-gray-200 p-4">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Today</h2>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">היום</h2>
         <div className="flex gap-4 flex-wrap">
           <div>
-            <p className="text-xs text-gray-400 mb-1">Submitted</p>
+            <p className="text-xs text-gray-400 mb-1">הגישו</p>
             <p className="text-2xl font-bold text-green-600">{submittedIds.size}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 mb-1">Missing</p>
+            <p className="text-xs text-gray-400 mb-1">חסרים</p>
             <p className="text-2xl font-bold text-red-500">{notSubmitted.length}</p>
           </div>
         </div>
         {notSubmitted.length > 0 && (
           <p className="text-xs text-gray-500 mt-3">
-            Not submitted: {notSubmitted.map(e => e.name).join(', ')}
+            לא הגישו: {notSubmitted.map(e => e.name).join(', ')}
           </p>
         )}
       </div>
@@ -88,10 +88,10 @@ export default async function ReportsPage({ searchParams }: Props) {
       {/* Reports */}
       {!reports || reports.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-sm">{hasFilters ? 'No reports match your filters.' : 'No reports yet.'}</p>
+          <p className="text-sm">{hasFilters ? 'אין דוחות התואמים לסינון.' : 'אין דוחות עדיין.'}</p>
           {hasFilters && (
             <Link href="/reports" className="mt-2 inline-block text-sm text-blue-600 underline">
-              Clear filters
+              נקה סינון
             </Link>
           )}
         </div>
@@ -109,11 +109,11 @@ export default async function ReportsPage({ searchParams }: Props) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Employee</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Project</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Work</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">תאריך</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">עובד</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">פרויקט</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">עבודה</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">סטטוס</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -131,7 +131,7 @@ export default async function ReportsPage({ searchParams }: Props) {
                     </td>
                     <td className="px-4 py-3">
                       <Link href={`/reports/${r.id}`} className="text-blue-600 hover:underline font-medium">
-                        Edit
+                        עריכה
                       </Link>
                     </td>
                   </tr>
@@ -152,7 +152,7 @@ function StatusBadge({ status }: { status: string }) {
         ? 'bg-green-100 text-green-700'
         : 'bg-yellow-100 text-yellow-700'
     }`}>
-      {status === 'reviewed' ? 'Reviewed' : 'Submitted'}
+      {status === 'reviewed' ? 'נבדק' : 'הוגש'}
     </span>
   )
 }

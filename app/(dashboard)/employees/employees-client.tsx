@@ -86,25 +86,25 @@ export default function EmployeesClient({ employees }: { employees: Employee[] }
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          Add employee
+          הוסף עובד
         </button>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 p-4">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">Add employee</h2>
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">הוסף עובד</h2>
           <form onSubmit={handleAdd} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">שם</label>
               <input
                 required
                 type="text"
-                placeholder="Full name"
+                placeholder="שם מלא"
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Telegram User ID</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">מזהה טלגרם</label>
               <input
                 required
                 type="number"
@@ -113,7 +113,7 @@ export default function EmployeesClient({ employees }: { employees: Employee[] }
                 onChange={e => setForm(f => ({ ...f, telegram_user_id: e.target.value }))}
                 className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-gray-400 mt-1">Employee can get their ID by messaging @userinfobot on Telegram</p>
+              <p className="text-xs text-gray-400 mt-1">העובד יכול לקבל את המזהה שלו על ידי שליחת הודעה ל-@userinfobot בטלגרם</p>
             </div>
             {error && (
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
@@ -124,14 +124,14 @@ export default function EmployeesClient({ employees }: { employees: Employee[] }
                 onClick={() => { setShowAdd(false); setError('') }}
                 className="flex-1 h-11 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium"
               >
-                Cancel
+                ביטול
               </button>
               <button
                 type="submit"
                 disabled={adding}
                 className="flex-1 h-11 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
               >
-                {adding ? 'Adding…' : 'Add'}
+                {adding ? 'מוסיף...' : 'הוסף'}
               </button>
             </div>
           </form>
@@ -140,7 +140,7 @@ export default function EmployeesClient({ employees }: { employees: Employee[] }
 
       {/* Employee list */}
       {employees.length === 0 ? (
-        <p className="text-center py-12 text-sm text-gray-400">No employees yet.</p>
+        <p className="text-center py-12 text-sm text-gray-400">אין עובדים עדיין.</p>
       ) : (
         <div className="space-y-2">
           {employees.map(e => (
@@ -161,14 +161,14 @@ export default function EmployeesClient({ employees }: { employees: Employee[] }
                       onClick={() => setEditingId(null)}
                       className="flex-1 h-9 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium"
                     >
-                      Cancel
+                      ביטול
                     </button>
                     <button
                       type="submit"
                       disabled={saving}
                       className="flex-1 h-9 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {saving ? 'Saving…' : 'Save'}
+                      {saving ? 'שומר...' : 'שמור'}
                     </button>
                   </div>
                 </form>
@@ -187,20 +187,20 @@ export default function EmployeesClient({ employees }: { employees: Employee[] }
                           : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100'
                       }`}
                     >
-                      {e.is_active ? 'Deactivate' : 'Activate'}
+                      {e.is_active ? 'השבת' : 'הפעל'}
                     </button>
                     <button
                       onClick={() => startEdit(e)}
                       className="h-9 px-3 rounded-xl text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"
                     >
-                      Edit
+                      ערוך
                     </button>
                     <button
                       onClick={() => handleDelete(e.id)}
                       disabled={deleting === e.id}
                       className="h-9 px-3 rounded-xl text-sm font-medium border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
                     >
-                      {deleting === e.id ? '…' : 'Delete'}
+                      {deleting === e.id ? '...' : 'מחק'}
                     </button>
                   </div>
                 </div>

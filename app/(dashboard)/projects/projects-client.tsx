@@ -72,28 +72,28 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          Add project
+          הוסף פרויקט
         </button>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 p-4">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">Add project</h2>
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">הוסף פרויקט</h2>
           <form onSubmit={handleAdd} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Project name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">שם פרויקט</label>
               <input
                 required
                 type="text"
-                placeholder="e.g. Babli Tower"
+                placeholder="לדוגמה: מגדל בבלי"
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Sort order</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">סדר מיון</label>
               <input
                 type="number"
-                placeholder="0 = first (lower = higher priority)"
+                placeholder="0 = ראשון (נמוך יותר = עדיפות גבוהה)"
                 value={form.sort_order}
                 onChange={e => setForm(f => ({ ...f, sort_order: e.target.value }))}
                 className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -108,14 +108,14 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                 onClick={() => { setShowAdd(false); setError('') }}
                 className="flex-1 h-11 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium"
               >
-                Cancel
+                ביטול
               </button>
               <button
                 type="submit"
                 disabled={adding}
                 className="flex-1 h-11 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
               >
-                {adding ? 'Adding…' : 'Add'}
+                {adding ? 'מוסיף...' : 'הוסף'}
               </button>
             </div>
           </form>
@@ -124,7 +124,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
 
       {/* Project list */}
       {projects.length === 0 ? (
-        <p className="text-center py-12 text-sm text-gray-400">No projects yet.</p>
+        <p className="text-center py-12 text-sm text-gray-400">אין פרויקטים עדיין.</p>
       ) : (
         <div className="space-y-2">
           {projects.map(p => (
@@ -151,12 +151,12 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                       </p>
                       {!p.is_active && (
                         <span className="shrink-0 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                          Inactive
+                          לא פעיל
                         </span>
                       )}
                     </div>
                   )}
-                  <p className="text-xs text-gray-400 mt-0.5">Order: {p.sort_order}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">סדר: {p.sort_order}</p>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -164,7 +164,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                     onClick={() => { setEditingId(p.id); setEditName(p.name) }}
                     className="h-9 px-3 rounded-xl text-sm text-gray-600 border border-gray-300 hover:bg-gray-50"
                   >
-                    Rename
+                    שנה שם
                   </button>
                   <button
                     onClick={() => toggleActive(p)}
@@ -174,7 +174,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                         : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100'
                     }`}
                   >
-                    {p.is_active ? 'Deactivate' : 'Activate'}
+                    {p.is_active ? 'השבת' : 'הפעל'}
                   </button>
                 </div>
               </div>

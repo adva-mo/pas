@@ -11,9 +11,9 @@ export default async function ProjectsPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-semibold text-gray-900">Projects</h1>
+      <h1 className="text-xl font-semibold text-gray-900">פרויקטים</h1>
       <p className="text-sm text-gray-500">
-        Employees choose from this list when submitting reports. Deactivated projects are hidden from the bot.
+        עובדים בוחרים מהרשימה הזו בעת הגשת דוחות. פרויקטים מושבתים לא מופיעים בבוט.
       </p>
       <ProjectsClient projects={projects ?? []} />
     </div>

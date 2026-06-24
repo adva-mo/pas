@@ -23,11 +23,11 @@ async function askProject(ctx: BotContext) {
     .order('name')
 
   if (!projects || projects.length === 0) {
-    await ctx.reply('No projects are configured yet. Contact your manager.')
+    await ctx.reply('אין פרויקטים מוגדרים. צור קשר עם המנהל.')
     return
   }
 
-  await ctx.reply('Where did you work today?', buildProjectKeyboard(projects))
+  await ctx.reply('איפה עבדת היום?', buildProjectKeyboard(projects))
 }
 
 export function registerHandlers(bot: Telegraf) {
@@ -44,19 +44,18 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (empError) {
-      await ctx.reply(`DB error: ${empError.message}`)
+      await ctx.reply(`שגיאה: ${empError.message}`)
       return
     }
 
     if (!employee) {
-      await ctx.reply(`Not found. Your Telegram ID: ${telegramUserId}`)
+      await ctx.reply(`לא נמצאת במערכת. צור קשר עם המנהל.\nמזהה הטלגרם שלך: ${telegramUserId}`)
       return
     }
 
-    // Clear any existing session
     await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
 
-    await ctx.reply(`Hi ${employee.name}! Let's submit your daily report.`)
+    await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
     await askProject(ctx)
   })
 
@@ -76,11 +75,10 @@ export function registerHandlers(bot: Telegraf) {
 
     if (!employee) {
       await ctx.answerCbQuery()
-      await ctx.reply('You are not registered. Contact your manager.')
+      await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
 
-    // Check if already submitted today
     const today = new Date().toISOString().slice(0, 10)
     const { data: existing } = await db
       .from('daily_reports')
@@ -91,7 +89,7 @@ export function registerHandlers(bot: Telegraf) {
 
     if (existing) {
       await ctx.answerCbQuery()
-      await ctx.reply('You already submitted today\'s report.')
+      await ctx.reply('כבר הגשת דוח להיום.')
       return
     }
 
@@ -105,7 +103,7 @@ export function registerHandlers(bot: Telegraf) {
 
     await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply(`Project: ${projectName}\n\nWhat did you do today?`)
+    await ctx.reply(`פרויקט: ${projectName}\n\nמה עשית היום?`)
   })
 
   // Confirm button
@@ -133,7 +131,7 @@ export function registerHandlers(bot: Telegraf) {
 
     if (!employee) {
       await ctx.answerCbQuery()
-      await ctx.reply('You are not registered. Contact your manager.')
+      await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
 
@@ -151,9 +149,9 @@ export function registerHandlers(bot: Telegraf) {
     if (error) {
       await ctx.answerCbQuery()
       if (error.code === '23505') {
-        await ctx.reply('You already submitted today\'s report.')
+        await ctx.reply('כבר הגשת דוח להיום.')
       } else {
-        await ctx.reply('Something went wrong. Please try again with /start.')
+        await ctx.reply('משהו השתבש. נסה שוב עם /start.')
       }
       await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
       return
@@ -162,7 +160,7 @@ export function registerHandlers(bot: Telegraf) {
     await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply('Report saved. ✓\n\nHave a great rest of your day!')
+    await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!')
   })
 
   // Start over button
@@ -172,7 +170,7 @@ export function registerHandlers(bot: Telegraf) {
     await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply('Starting over.')
+    await ctx.reply('מתחיל מחדש.')
     await askProject(ctx)
   })
 
@@ -189,13 +187,13 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!session) {
-      await ctx.reply('Send /start to submit your daily report.')
+      await ctx.reply('שלח /start כדי להגיש את הדוח היומי.')
       return
     }
 
     if (session.step === 'work') {
       if (!text) {
-        await ctx.reply('Please describe what you did today.')
+        await ctx.reply('אנא תאר מה עשית היום.')
         return
       }
 
@@ -206,8 +204,8 @@ export function registerHandlers(bot: Telegraf) {
       }).eq('telegram_user_id', telegramUserId)
 
       await ctx.reply(
-        'Any notes? You can skip.',
-        Markup.inlineKeyboard([Markup.button.callback('Skip', 'skip_notes')])
+        'יש הערות? אפשר לדלג.',
+        Markup.inlineKeyboard([Markup.button.callback('דלג', 'skip_notes')])
       )
       return
     }
@@ -218,12 +216,12 @@ export function registerHandlers(bot: Telegraf) {
     }
 
     if (session.step === 'project') {
-      await ctx.reply('Please choose a project from the options above.')
+      await ctx.reply('אנא בחר פרויקט מהאפשרויות למעלה.')
       return
     }
 
     if (session.step === 'confirm') {
-      await ctx.reply('Please tap Confirm or Start Over.')
+      await ctx.reply('אנא לחץ על אשר או התחל מחדש.')
       return
     }
   })
@@ -261,13 +259,13 @@ async function handleNotesAndShowSummary(
     updated_at: new Date().toISOString(),
   }).eq('telegram_user_id', telegramUserId)
 
-  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const today = new Date().toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const summary = [
-    `*Summary*`,
-    `📅 Date: ${today}`,
-    `📍 Project: ${session.project_name}`,
-    `📝 Work: ${session.work_description}`,
-    notes ? `💬 Notes: ${notes}` : null,
+    `*סיכום*`,
+    `📅 תאריך: ${today}`,
+    `📍 פרויקט: ${session.project_name}`,
+    `📝 עבודה: ${session.work_description}`,
+    notes ? `💬 הערות: ${notes}` : null,
   ].filter(Boolean).join('\n')
 
   await ctx.reply(
@@ -275,8 +273,8 @@ async function handleNotesAndShowSummary(
     {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
-        Markup.button.callback('✓ Confirm', 'confirm'),
-        Markup.button.callback('↩ Start Over', 'start_over'),
+        Markup.button.callback('✓ אשר', 'confirm'),
+        Markup.button.callback('↩ התחל מחדש', 'start_over'),
       ]),
     }
   )
