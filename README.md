@@ -16,7 +16,9 @@ Employees submit daily reports via a Telegram bot. Admins review them on a mobil
 ### 1. Supabase project
 
 1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the contents of `supabase/migrations/001_initial.sql`
+2. Go to **SQL Editor** and run the migrations in order:
+   - `supabase/migrations/001_initial.sql`
+   - `supabase/migrations/002_add_telegram_username.sql`
 3. Go to **Authentication → Providers** — Email is already enabled by default
 4. Create the first admin user:
    - Go to **Authentication → Users → Add user**
@@ -57,16 +59,16 @@ TELEGRAM_WEBHOOK_SECRET=
 
 ```bash
 npm install
-npm run dev
+npm run dev        # Next.js on http://localhost:3000
 ```
 
-The app runs at `http://localhost:3000`.
+To test the bot locally without ngrok, run it in polling mode in a second terminal:
 
-For local bot testing, use [ngrok](https://ngrok.com) to expose localhost:
 ```bash
-ngrok http 3000
-# then register the webhook with the ngrok URL
+npm run bot:dev
 ```
+
+In polling mode the bot connects directly to Telegram — no public URL needed. While `bot:dev` is running, the production webhook is paused; it resumes automatically when you stop the script.
 
 ### 5. Deploy to Vercel
 
@@ -80,9 +82,14 @@ vercel --prod
 
 ## Employee onboarding
 
-1. Admin adds the employee in the dashboard (Employees page)
-2. Admin needs the employee's Telegram user ID — employee can get it by messaging [@userinfobot](https://t.me/userinfobot)
-3. Employee opens the bot and sends `/start`
+Employees self-register — no admin action required beforehand.
+
+1. Employee opens the bot and sends `/start`
+2. Bot asks for their full name
+3. Employee types their name → account is created automatically
+4. Bot proceeds directly to the daily report flow
+
+Admin can rename or deactivate employees from the dashboard at any time. A deactivated employee cannot submit reports until reactivated.
 
 ---
 
@@ -97,23 +104,45 @@ vercel --prod
 
 ### Projects setup
 
-Before employees can submit reports, add projects on the Projects page. Set `sort_order` to control the order in the bot keyboard (lower = first). The migration seeds two example projects (Office, Remote) — edit or delete them as needed.
+Before employees can submit reports, add projects on the Projects page. The migration seeds two example projects (Office, Remote) — edit or delete them as needed.
 
 ---
 
 ## Bot flow
 
+**First-time user:**
 ```
 /start
-  → "Where did you work today?" [Project buttons]
-  → Employee taps a project
-  → "What did you do?"
-  → Employee types work description
-  → "Any notes?" [Skip button]
-  → Employee types notes or taps Skip
-  → Summary shown + [✓ Confirm] [↩ Start Over]
-  → "Report saved. ✓"
+  → "שלום 👋 איך קוראים לך?"  [Telegram display name suggested]
+  → Employee types full name
+  → Account created → continues to report flow
 ```
+
+**Returning user:**
+```
+/start
+  → "היי [name]! בוא נגיש את הדוח היומי."
+  → [Project buttons]
+  → Employee taps a project
+  → "מה עשית היום?"
+  → Employee types work description
+  → "יש הערות?" [Skip button]
+  → Employee types notes or taps Skip
+  → Summary shown + [✓ אשר] [↩ התחל מחדש]
+  → "הדוח נשמר. ✓"
+```
+
+---
+
+## Testing
+
+```bash
+npm test              # run all tests once
+npm run test:watch    # watch mode
+npm run test:coverage # coverage report
+```
+
+Unit tests cover the bot handler state machine (`lib/telegram/__tests__/`). Integration tests cover the webhook route (`app/api/telegram/__tests__/`).
 
 ---
 
