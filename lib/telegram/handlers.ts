@@ -30,16 +30,15 @@ async function askProject(ctx: BotContext) {
 }
 
 export function registerHandlers(bot: Telegraf) {
-  // /start — always reset and begin
+  // /start — self-register if unknown, reset session and begin
   bot.start(async (ctx) => {
     const telegramUserId = ctx.from.id
     const db = createSupabaseServiceClient()
 
     const { data: employee, error: empError } = await db
       .from('employees')
-      .select('id, name')
+      .select('id, name, is_active')
       .eq('telegram_user_id', telegramUserId)
-      .eq('is_active', true)
       .maybeSingle()
 
     if (empError) {
@@ -47,15 +46,50 @@ export function registerHandlers(bot: Telegraf) {
       return
     }
 
-    if (!employee) {
-      await ctx.reply(`לא נמצאת במערכת. צור קשר עם המנהל.\nמזהה הטלגרם שלך: ${telegramUserId}`)
+    if (employee) {
+      if (!employee.is_active) {
+        await ctx.reply('החשבון שלך אינו פעיל. פנה למנהל שלך.')
+        return
+      }
+      await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+      await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
+      await askProject(ctx)
       return
     }
 
-    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+    // Unknown user — check if already mid-onboarding (avoid resetting on /start spam)
+    const { data: existingSession } = await db
+      .from('bot_sessions')
+      .select('step')
+      .eq('telegram_user_id', telegramUserId)
+      .maybeSingle()
 
-    await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
-    await askProject(ctx)
+    if (existingSession?.step === 'onboarding_name') {
+      await ctx.reply('שלום 👋\nאיך קוראים לך?')
+      return
+    }
+
+    // Start onboarding
+    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+    await db.from('bot_sessions').upsert({
+      telegram_user_id: telegramUserId,
+      step: 'onboarding_name',
+      updated_at: new Date().toISOString(),
+    })
+
+    const from = ctx.from
+    const displayName = from.last_name
+      ? `${from.first_name} ${from.last_name}`
+      : from.first_name
+
+    if (displayName) {
+      await ctx.reply(
+        'שלום 👋\nאיך קוראים לך?',
+        Markup.keyboard([[displayName]]).oneTime().resize()
+      )
+    } else {
+      await ctx.reply('שלום 👋\nאיך קוראים לך?')
+    }
   })
 
   // Project button tap
@@ -187,6 +221,44 @@ export function registerHandlers(bot: Telegraf) {
 
     if (!session) {
       await ctx.reply('שלח /start כדי להגיש את הדוח היומי.')
+      return
+    }
+
+    if (session.step === 'onboarding_name') {
+      const name = text.trim()
+      if (name.length < 2) {
+        await ctx.reply('השם קצר מדי. אנא הקלד את שמך המלא.', Markup.removeKeyboard())
+        return
+      }
+
+      const { error } = await db.from('employees').insert({
+        name,
+        telegram_user_id: telegramUserId,
+        telegram_username: ctx.from?.username ?? null,
+      })
+
+      if (error) {
+        if (error.code === '23505') {
+          // Race condition — employee already exists, just continue
+          const { data: existing } = await db
+            .from('employees')
+            .select('id, name')
+            .eq('telegram_user_id', telegramUserId)
+            .single()
+          if (existing) {
+            await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+            await ctx.reply(`ברוך הבא חזרה, ${existing.name}!`, Markup.removeKeyboard())
+            await askProject(ctx)
+            return
+          }
+        }
+        await ctx.reply('אירעה שגיאה. נסה שוב עם /start.')
+        return
+      }
+
+      await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+      await ctx.reply(`נעים להכיר, ${name}! 🎉`, Markup.removeKeyboard())
+      await askProject(ctx)
       return
     }
 

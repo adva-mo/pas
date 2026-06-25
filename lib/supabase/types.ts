@@ -8,6 +8,7 @@ export interface Database {
           id: string
           name: string
           telegram_user_id: number
+          telegram_username: string | null
           is_active: boolean
           created_at: string
         }
