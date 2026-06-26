@@ -171,6 +171,52 @@ describe('registerHandlers', () => {
     })
   })
 
+  // ─── notes step ────────────────────────────────────────────────────────────
+
+  describe('notes step — text input', () => {
+    it('saves notes and shows confirm summary', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'notes', project_name: 'בבלי', work_description: 'פיתוח', notes: null },
+        error: null,
+      })
+
+      const ctx = makeCtx({ message: { text: 'הכל תקין' } })
+      await bot.triggerText(ctx)
+
+      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'confirm', notes: 'הכל תקין' })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('בבלי'),
+        expect.anything()
+      )
+    })
+  })
+
+  // ─── wrong step text fallbacks ─────────────────────────────────────────────
+
+  describe('text while waiting for button', () => {
+    it('prompts to use keyboard when in project step', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'project' },
+        error: null,
+      })
+      const ctx = makeCtx({ message: { text: 'בבלי' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא בחר פרויקט מהאפשרויות למעלה.')
+    })
+
+    it('prompts to use buttons when in confirm step', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'confirm' },
+        error: null,
+      })
+      const ctx = makeCtx({ message: { text: 'כן' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא לחץ על אשר או התחל מחדש.')
+    })
+  })
+
   // ─── no session ────────────────────────────────────────────────────────────
 
   describe('text with no session', () => {
@@ -181,6 +227,141 @@ describe('registerHandlers', () => {
       await bot.triggerText(ctx)
 
       expect(ctx.reply).toHaveBeenCalledWith('שלח /start כדי להגיש את הדוח היומי.')
+    })
+  })
+
+  // ─── project action ────────────────────────────────────────────────────────
+
+  describe('project button tap', () => {
+    const projectCtx = () => makeCtx({ match: ['project:proj-1:בבלי', 'proj-1', 'בבלי'] })
+
+    it('blocks employee not found', async () => {
+      db.chains.employees.maybeSingle.mockResolvedValue({ data: null, error: null })
+      const ctx = projectCtx()
+      await bot.triggerAction('/^project:(.+):(.+)$/', ctx)
+      expect(ctx.answerCbQuery).toHaveBeenCalled()
+      expect(ctx.reply).toHaveBeenCalledWith('לא רשום במערכת. צור קשר עם המנהל.')
+    })
+
+    it('blocks duplicate report for today', async () => {
+      db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
+      db.chains.daily_reports.maybeSingle.mockResolvedValue({ data: { id: 'rep-1' }, error: null })
+      const ctx = projectCtx()
+      await bot.triggerAction('/^project:(.+):(.+)$/', ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('כבר הגשת דוח להיום.')
+    })
+
+    it('saves project selection and asks for work description', async () => {
+      db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
+      db.chains.daily_reports.maybeSingle.mockResolvedValue({ data: null, error: null })
+      const ctx = projectCtx()
+      await bot.triggerAction('/^project:(.+):(.+)$/', ctx)
+      expect(db.chains.bot_sessions.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'work', project_id: 'proj-1', project_name: 'בבלי' })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith(expect.stringContaining('בבלי'))
+    })
+  })
+
+  // ─── confirm action ────────────────────────────────────────────────────────
+
+  describe('confirm button', () => {
+    const confirmSession = {
+      step: 'confirm',
+      project_id: 'proj-1',
+      project_name: 'בבלי',
+      work_description: 'פיתוח',
+      notes: null,
+    }
+
+    it('does nothing if session is not in confirm step', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'work' },
+        error: null,
+      })
+      const ctx = makeCtx()
+      await bot.triggerAction('confirm', ctx)
+      expect(ctx.answerCbQuery).toHaveBeenCalled()
+      expect(db.chains.daily_reports.insert).not.toHaveBeenCalled()
+    })
+
+    it('blocks employee not found', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({ data: confirmSession, error: null })
+      db.chains.employees.maybeSingle.mockResolvedValue({ data: null, error: null })
+      const ctx = makeCtx()
+      await bot.triggerAction('confirm', ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('לא רשום במערכת. צור קשר עם המנהל.')
+    })
+
+    it('saves report and confirms to user', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({ data: confirmSession, error: null })
+      db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
+      db.chains.daily_reports.insert.mockResolvedValue({ error: null })
+      const ctx = makeCtx()
+      await bot.triggerAction('confirm', ctx)
+      expect(db.chains.daily_reports.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ employee_id: 'emp-1', location: 'בבלי', work_description: 'פיתוח' })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith('הדוח נשמר. ✓\n\nיום טוב!')
+    })
+
+    it('shows duplicate error if report already exists', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({ data: confirmSession, error: null })
+      db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
+      db.chains.daily_reports.insert.mockResolvedValue({ error: { code: '23505' } })
+      const ctx = makeCtx()
+      await bot.triggerAction('confirm', ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('כבר הגשת דוח להיום.')
+    })
+
+    it('shows generic error on unexpected DB failure', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({ data: confirmSession, error: null })
+      db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
+      db.chains.daily_reports.insert.mockResolvedValue({ error: { code: '99999' } })
+      const ctx = makeCtx()
+      await bot.triggerAction('confirm', ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('משהו השתבש. נסה שוב עם /start.')
+    })
+  })
+
+  // ─── start_over action ─────────────────────────────────────────────────────
+
+  describe('start_over button', () => {
+    it('deletes session and restarts project selection', async () => {
+      const ctx = makeCtx()
+      await bot.triggerAction('start_over', ctx)
+      expect(ctx.answerCbQuery).toHaveBeenCalled()
+      expect(ctx.editMessageReplyMarkup).toHaveBeenCalled()
+      expect(ctx.reply).toHaveBeenCalledWith('מתחיל מחדש.')
+      expect(ctx.reply).toHaveBeenCalledWith('איפה עבדת היום?', expect.anything())
+    })
+  })
+
+  // ─── skip_notes action ─────────────────────────────────────────────────────
+
+  describe('skip_notes button', () => {
+    it('does nothing if no session', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({ data: null, error: null })
+      const ctx = makeCtx()
+      await bot.triggerAction('skip_notes', ctx)
+      expect(ctx.answerCbQuery).toHaveBeenCalled()
+      expect(ctx.reply).not.toHaveBeenCalled()
+    })
+
+    it('shows confirm summary with no notes', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'notes', project_name: 'עזריאלי', work_description: 'ישיבות', notes: null },
+        error: null,
+      })
+      const ctx = makeCtx()
+      await bot.triggerAction('skip_notes', ctx)
+      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'confirm', notes: null })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('עזריאלי'),
+        expect.anything()
+      )
     })
   })
 })
