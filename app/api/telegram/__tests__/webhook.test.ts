@@ -24,11 +24,16 @@ function makeRequest(body: object, secretOverride?: string) {
 
 describe('POST /api/telegram/webhook', () => {
   let handleUpdate: ReturnType<typeof vi.fn>
+  let sendMessage: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     process.env.TELEGRAM_WEBHOOK_SECRET = SECRET
     handleUpdate = vi.fn().mockResolvedValue(undefined)
-    vi.mocked(getBot).mockReturnValue({ handleUpdate } as any)
+    sendMessage = vi.fn().mockResolvedValue(undefined)
+    vi.mocked(getBot).mockReturnValue({
+      handleUpdate,
+      telegram: { sendMessage },
+    } as any)
   })
 
   it('returns 401 when secret header is missing', async () => {
@@ -54,5 +59,34 @@ describe('POST /api/telegram/webhook', () => {
     const res = await POST(req)
     expect(res.status).toBe(200)
     expect(handleUpdate).toHaveBeenCalledWith(body)
+  })
+
+  it('returns 200 and notifies user when handler throws', async () => {
+    handleUpdate.mockRejectedValue(new Error('supabase connection error'))
+    const body = {
+      update_id: 43,
+      message: { chat: { id: 999 }, from: { id: 999 }, text: 'hi', date: 0 },
+    }
+    const req = makeRequest(body, SECRET)
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(sendMessage).toHaveBeenCalledWith(999, 'משהו השתבש. נסה שוב עם /start.')
+  })
+
+  it('returns 200 even when handler times out', async () => {
+    vi.useFakeTimers()
+    handleUpdate.mockImplementation(() => new Promise(() => {})) // never resolves
+
+    const body = {
+      update_id: 44,
+      message: { chat: { id: 888 }, from: { id: 888 }, text: 'hi', date: 0 },
+    }
+    const req = makeRequest(body, SECRET)
+    const postPromise = POST(req)
+    await vi.runAllTimersAsync() // fires the 8s timeout and flushes microtasks
+    const res = await postPromise
+    expect(res.status).toBe(200)
+    expect(sendMessage).toHaveBeenCalledWith(888, 'משהו השתבש. נסה שוב עם /start.')
+    vi.useRealTimers()
   })
 })
