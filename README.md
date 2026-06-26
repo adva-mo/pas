@@ -16,9 +16,7 @@ Employees submit daily reports via a Telegram bot. Admins review them on a mobil
 ### 1. Supabase project
 
 1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the migrations in order:
-   - `supabase/migrations/001_initial.sql`
-   - `supabase/migrations/002_add_telegram_username.sql`
+2. Go to **SQL Editor** and run `supabase/migrations/001_initial.sql`
 3. Go to **Authentication → Providers** — Email is already enabled by default
 4. Create the first admin user:
    - Go to **Authentication → Users → Add user**

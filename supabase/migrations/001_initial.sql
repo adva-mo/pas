@@ -6,11 +6,12 @@
 
 -- 1. Employees
 CREATE TABLE employees (
-  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name             TEXT NOT NULL,
-  telegram_user_id BIGINT UNIQUE NOT NULL,
-  is_active        BOOLEAN NOT NULL DEFAULT true,
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name              TEXT NOT NULL,
+  telegram_user_id  BIGINT UNIQUE NOT NULL,
+  telegram_username TEXT,
+  is_active         BOOLEAN NOT NULL DEFAULT true,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
@@ -34,7 +35,7 @@ CREATE POLICY "service role only" ON projects
 -- 3. Bot conversation sessions
 CREATE TABLE bot_sessions (
   telegram_user_id BIGINT PRIMARY KEY,
-  step             TEXT NOT NULL,  -- 'project' | 'work' | 'notes' | 'confirm'
+  step             TEXT NOT NULL,  -- 'onboarding_name' | 'project' | 'work' | 'notes' | 'confirm'
   project_id       UUID REFERENCES projects(id) ON DELETE SET NULL,
   project_name     TEXT,
   work_description TEXT,
