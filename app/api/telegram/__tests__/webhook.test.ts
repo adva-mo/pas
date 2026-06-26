@@ -34,6 +34,7 @@ describe('POST /api/telegram/webhook', () => {
       handleUpdate,
       telegram: { sendMessage },
     } as any)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   it('returns 401 when secret header is missing', async () => {
