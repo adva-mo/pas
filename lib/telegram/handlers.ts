@@ -344,8 +344,8 @@ export function registerHandlers(bot: Telegraf) {
     }
 
     if (session.step === 'slides_count') {
-      const value = parseInt(text, 10)
-      if (isNaN(value) || value <= 0) {
+      const value = Number(text)
+      if (!Number.isInteger(value) || value <= 0) {
         await ctx.reply('אנא הזן מספר גלישות חוקי (מספר שלם חיובי).')
         return
       }

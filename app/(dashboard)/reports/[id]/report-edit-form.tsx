@@ -17,9 +17,9 @@ export default function ReportEditForm({ report, projects }: Props) {
     status: report.status,
     admin_notes: report.admin_notes ?? '',
     payment_type: report.payment_type ?? null,
-    daily_rate: report.daily_rate ?? '',
-    price_per_slide: report.price_per_slide ?? '',
-    slides_count: report.slides_count ?? '',
+    daily_rate: String(report.daily_rate ?? ''),
+    price_per_slide: String(report.price_per_slide ?? ''),
+    slides_count: String(report.slides_count ?? ''),
   })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
