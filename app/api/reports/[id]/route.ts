@@ -16,16 +16,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const body = await req.json()
   const db = createSupabaseServiceClient()
 
+  const paymentFields = body.payment_type != null ? {
+    payment_type: body.payment_type,
+    daily_rate: body.daily_rate,
+    price_per_slide: body.price_per_slide,
+    slides_count: body.slides_count,
+  } : {}
+
   const { error } = await db.from('daily_reports').update({
     project_id: body.project_id,
     location: body.location,
     notes: body.notes,
     status: body.status,
     admin_notes: body.admin_notes,
-    payment_type: body.payment_type,
-    daily_rate: body.daily_rate,
-    price_per_slide: body.price_per_slide,
-    slides_count: body.slides_count,
+    ...paymentFields,
   }).eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

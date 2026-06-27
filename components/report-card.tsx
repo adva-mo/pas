@@ -33,8 +33,10 @@ export default function ReportCard({ report }: Props) {
       {report.payment_type && (
         <p className="text-xs text-gray-500">
           {report.payment_type === 'daily'
-            ? `💰 יומי — ₪${report.daily_rate}`
-            : `💰 לפי גלישה — ₪${report.price_per_slide} × ${report.slides_count} = ₪${(report.price_per_slide! * report.slides_count!)}`
+            ? `💰 יומי — ₪${report.daily_rate ?? '—'}`
+            : report.price_per_slide != null && report.slides_count != null
+              ? `💰 לפי גלישה — ₪${report.price_per_slide} × ${report.slides_count} = ₪${report.price_per_slide * report.slides_count}`
+              : `💰 לפי גלישה`
           }
         </p>
       )}

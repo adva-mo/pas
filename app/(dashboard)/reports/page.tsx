@@ -126,8 +126,8 @@ export default async function ReportsPage({ searchParams }: Props) {
                     <td className="px-4 py-3 text-gray-900 font-medium">{r.employees?.name}</td>
                     <td className="px-4 py-3 text-gray-700">{r.location}</td>
                     <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
-                      {r.payment_type === 'daily' && `יומי ₪${r.daily_rate}`}
-                      {r.payment_type === 'per_slide' && `₪${r.price_per_slide}×${r.slides_count}`}
+                      {r.payment_type === 'daily' && `יומי ₪${r.daily_rate ?? '—'}`}
+                      {r.payment_type === 'per_slide' && r.price_per_slide != null && r.slides_count != null && `₪${r.price_per_slide}×${r.slides_count}`}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={r.status} />

@@ -16,7 +16,7 @@ export default function ReportEditForm({ report, projects }: Props) {
     notes: report.notes ?? '',
     status: report.status,
     admin_notes: report.admin_notes ?? '',
-    payment_type: report.payment_type ?? 'daily',
+    payment_type: report.payment_type ?? null,
     daily_rate: report.daily_rate ?? '',
     price_per_slide: report.price_per_slide ?? '',
     slides_count: report.slides_count ?? '',
@@ -39,9 +39,9 @@ export default function ReportEditForm({ report, projects }: Props) {
       status: form.status,
       admin_notes: form.admin_notes || null,
       payment_type: form.payment_type,
-      daily_rate: form.payment_type === 'daily' ? Number(form.daily_rate) || null : null,
-      price_per_slide: form.payment_type === 'per_slide' ? Number(form.price_per_slide) || null : null,
-      slides_count: form.payment_type === 'per_slide' ? Number(form.slides_count) || null : null,
+      daily_rate: form.payment_type === 'daily' ? (form.daily_rate === '' ? null : Number(form.daily_rate)) : null,
+      price_per_slide: form.payment_type === 'per_slide' ? (form.price_per_slide === '' ? null : Number(form.price_per_slide)) : null,
+      slides_count: form.payment_type === 'per_slide' ? (form.slides_count === '' ? null : Number(form.slides_count)) : null,
     }
 
     const res = await fetch(`/api/reports/${report.id}`, {
