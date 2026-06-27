@@ -120,7 +120,7 @@ export default function ReportEditForm({ report, projects }: Props) {
           <div className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base bg-gray-50 text-gray-700">
             {report.payment_type === 'daily'
               ? `יומי — ₪${report.daily_rate}`
-              : `לפי שקופית — ₪${report.price_per_slide} × ${report.slides_count} = ₪${(report.price_per_slide! * report.slides_count!)}`
+              : `לפי גלישה — ₪${report.price_per_slide} × ${report.slides_count} = ₪${(report.price_per_slide! * report.slides_count!)}`
             }
           </div>
         </div>

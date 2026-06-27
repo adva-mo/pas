@@ -174,7 +174,7 @@ export function registerHandlers(bot: Telegraf) {
 
     await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply('מה המחיר לשקופית (בש״ח)?')
+    await ctx.reply('מה המחיר לגלישה (בש״ח)?')
   })
 
   // Confirm button
@@ -320,7 +320,7 @@ export function registerHandlers(bot: Telegraf) {
         'סוג תשלום?',
         Markup.inlineKeyboard([
           Markup.button.callback('יומי', 'payment:daily'),
-          Markup.button.callback('לפי שקופית', 'payment:per_slide'),
+          Markup.button.callback('לפי גלישה', 'payment:per_slide'),
         ])
       )
       return
@@ -356,14 +356,14 @@ export function registerHandlers(bot: Telegraf) {
         updated_at: new Date().toISOString(),
       }).eq('telegram_user_id', telegramUserId)
 
-      await ctx.reply('כמה שקופיות עשית?')
+      await ctx.reply('כמה גלישות עשית?')
       return
     }
 
     if (session.step === 'slides_count') {
       const value = parseInt(text, 10)
       if (isNaN(value) || value <= 0) {
-        await ctx.reply('אנא הזן מספר שקופיות חוקי (מספר שלם חיובי).')
+        await ctx.reply('אנא הזן מספר גלישות חוקי (מספר שלם חיובי).')
         return
       }
 
@@ -443,7 +443,7 @@ async function handleNotesAndShowSummary(
     paymentLine = `💰 תשלום: יומי — ₪${session.daily_rate}`
   } else if (session.payment_type === 'per_slide' && session.price_per_slide != null && session.slides_count != null) {
     const total = session.price_per_slide * session.slides_count
-    paymentLine = `💰 תשלום: לפי שקופית — ₪${session.price_per_slide} × ${session.slides_count} = ₪${total}`
+    paymentLine = `💰 תשלום: לפי גלישה — ₪${session.price_per_slide} × ${session.slides_count} = ₪${total}`
   }
 
   const summary = [

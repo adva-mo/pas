@@ -36,7 +36,7 @@ export default function ReportCard({ report }: Props) {
         <p className="text-xs text-gray-500">
           {report.payment_type === 'daily'
             ? `💰 יומי — ₪${report.daily_rate}`
-            : `💰 לפי שקופית — ₪${report.price_per_slide} × ${report.slides_count} = ₪${(report.price_per_slide! * report.slides_count!)}`
+            : `💰 לפי גלישה — ₪${report.price_per_slide} × ${report.slides_count} = ₪${(report.price_per_slide! * report.slides_count!)}`
           }
         </p>
       )}

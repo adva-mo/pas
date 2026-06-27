@@ -193,7 +193,7 @@ describe('registerHandlers', () => {
       expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
         expect.objectContaining({ step: 'price_per_slide', payment_type: 'per_slide' })
       )
-      expect(ctx.reply).toHaveBeenCalledWith('מה המחיר לשקופית (בש״ח)?')
+      expect(ctx.reply).toHaveBeenCalledWith('מה המחיר לגלישה (בש״ח)?')
     })
   })
 
@@ -252,7 +252,7 @@ describe('registerHandlers', () => {
       expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
         expect.objectContaining({ step: 'slides_count', price_per_slide: 50 })
       )
-      expect(ctx.reply).toHaveBeenCalledWith('כמה שקופיות עשית?')
+      expect(ctx.reply).toHaveBeenCalledWith('כמה גלישות עשית?')
     })
   })
 
@@ -269,13 +269,13 @@ describe('registerHandlers', () => {
     it('rejects non-integer input', async () => {
       const ctx = makeCtx({ message: { text: 'הרבה' } })
       await bot.triggerText(ctx)
-      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מספר שקופיות חוקי (מספר שלם חיובי).')
+      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מספר גלישות חוקי (מספר שלם חיובי).')
     })
 
     it('rejects zero', async () => {
       const ctx = makeCtx({ message: { text: '0' } })
       await bot.triggerText(ctx)
-      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מספר שקופיות חוקי (מספר שלם חיובי).')
+      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מספר גלישות חוקי (מספר שלם חיובי).')
     })
 
     it('saves slide count and asks for notes', async () => {
