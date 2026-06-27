@@ -26,8 +26,6 @@ export default function ReportCard({ report }: Props) {
         </span>
       </div>
 
-      <p className="text-sm text-gray-700 leading-relaxed">{report.work_description}</p>
-
       {report.notes && (
         <p className="text-xs text-gray-500 italic">{report.notes}</p>
       )}

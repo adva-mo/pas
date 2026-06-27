@@ -13,10 +13,13 @@ export default function ReportEditForm({ report, projects }: Props) {
   const router = useRouter()
   const [form, setForm] = useState({
     project_id: report.project_id ?? '',
-    work_description: report.work_description,
     notes: report.notes ?? '',
     status: report.status,
     admin_notes: report.admin_notes ?? '',
+    payment_type: report.payment_type ?? 'daily',
+    daily_rate: report.daily_rate ?? '',
+    price_per_slide: report.price_per_slide ?? '',
+    slides_count: report.slides_count ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -32,10 +35,13 @@ export default function ReportEditForm({ report, projects }: Props) {
     const body = {
       project_id: form.project_id || null,
       location: selectedProject?.name ?? report.location,
-      work_description: form.work_description,
       notes: form.notes || null,
       status: form.status,
       admin_notes: form.admin_notes || null,
+      payment_type: form.payment_type,
+      daily_rate: form.payment_type === 'daily' ? Number(form.daily_rate) || null : null,
+      price_per_slide: form.payment_type === 'per_slide' ? Number(form.price_per_slide) || null : null,
+      slides_count: form.payment_type === 'per_slide' ? Number(form.slides_count) || null : null,
     }
 
     const res = await fetch(`/api/reports/${report.id}`, {
@@ -77,15 +83,61 @@ export default function ReportEditForm({ report, projects }: Props) {
         <p className="text-xs text-gray-400 mt-1">נוכחי: {report.location}</p>
       </div>
 
-      {/* Work description */}
+      {/* Payment */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">תיאור עבודה</label>
-        <textarea
-          rows={4}
-          value={form.work_description ?? ''}
-          onChange={e => setForm(f => ({ ...f, work_description: e.target.value }))}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">סוג תשלום</label>
+        <div className="flex gap-3 mb-3">
+          {(['daily', 'per_slide'] as const).map(t => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setForm(f => ({ ...f, payment_type: t }))}
+              className={`flex-1 h-11 rounded-xl text-sm font-medium border transition-colors ${
+                form.payment_type === t
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {t === 'daily' ? 'יומי' : 'לפי גלישה'}
+            </button>
+          ))}
+        </div>
+        {form.payment_type === 'daily' && (
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">תעריף יומי (₪)</label>
+            <input
+              type="number"
+              min={0}
+              value={form.daily_rate}
+              onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))}
+              className="w-full h-11 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        )}
+        {form.payment_type === 'per_slide' && (
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">מחיר לגלישה (₪)</label>
+              <input
+                type="number"
+                min={0}
+                value={form.price_per_slide}
+                onChange={e => setForm(f => ({ ...f, price_per_slide: e.target.value }))}
+                className="w-full h-11 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">מספר גלישות</label>
+              <input
+                type="number"
+                min={0}
+                value={form.slides_count}
+                onChange={e => setForm(f => ({ ...f, slides_count: e.target.value }))}
+                className="w-full h-11 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Notes */}
@@ -111,19 +163,6 @@ export default function ReportEditForm({ report, projects }: Props) {
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />
       </div>
-
-      {/* Payment */}
-      {report.payment_type && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">תשלום</label>
-          <div className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base bg-gray-50 text-gray-700">
-            {report.payment_type === 'daily'
-              ? `יומי — ₪${report.daily_rate}`
-              : `לפי גלישה — ₪${report.price_per_slide} × ${report.slides_count} = ₪${(report.price_per_slide! * report.slides_count!)}`
-            }
-          </div>
-        </div>
-      )}
 
       {/* Status */}
       <div>
