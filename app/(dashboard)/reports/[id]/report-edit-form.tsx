@@ -81,9 +81,8 @@ export default function ReportEditForm({ report, projects }: Props) {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1.5">תיאור עבודה</label>
         <textarea
-          required
           rows={4}
-          value={form.work_description}
+          value={form.work_description ?? ''}
           onChange={e => setForm(f => ({ ...f, work_description: e.target.value }))}
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />

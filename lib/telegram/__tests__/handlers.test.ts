@@ -150,27 +150,6 @@ describe('registerHandlers', () => {
     })
   })
 
-  // ─── work step ─────────────────────────────────────────────────────────────
-
-  describe('work step — text input', () => {
-    beforeEach(() => {
-      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
-        data: { step: 'work', project_id: 'proj-1', project_name: 'בבלי' },
-        error: null,
-      })
-    })
-
-    it('saves work description and asks for payment type', async () => {
-      const ctx = makeCtx({ message: { text: 'פיתוח ממשק משתמש' } })
-      await bot.triggerText(ctx)
-
-      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
-        expect.objectContaining({ step: 'payment_type', work_description: 'פיתוח ממשק משתמש' })
-      )
-      expect(ctx.reply).toHaveBeenCalledWith('סוג תשלום?', expect.anything())
-    })
-  })
-
   // ─── payment type actions ──────────────────────────────────────────────────
 
   describe('payment:daily button', () => {
@@ -293,7 +272,7 @@ describe('registerHandlers', () => {
   describe('notes step — text input', () => {
     it('saves notes and shows confirm summary', async () => {
       db.chains.bot_sessions.maybeSingle.mockResolvedValue({
-        data: { step: 'notes', project_name: 'בבלי', work_description: 'פיתוח', notes: null, payment_type: 'daily', daily_rate: 350, price_per_slide: null, slides_count: null },
+        data: { step: 'notes', project_name: 'בבלי', notes: null, payment_type: 'daily', daily_rate: 350, price_per_slide: null, slides_count: null },
         error: null,
       })
 
@@ -378,15 +357,15 @@ describe('registerHandlers', () => {
       expect(ctx.reply).toHaveBeenCalledWith('כבר הגשת דוח להיום.')
     })
 
-    it('saves project selection and asks for work description', async () => {
+    it('saves project selection and asks for payment type', async () => {
       db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
       db.chains.daily_reports.maybeSingle.mockResolvedValue({ data: null, error: null })
       const ctx = projectCtx()
       await bot.triggerAction('/^project:(.+):(.+)$/', ctx)
       expect(db.chains.bot_sessions.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({ step: 'work', project_id: 'proj-1', project_name: 'בבלי' })
+        expect.objectContaining({ step: 'payment_type', project_id: 'proj-1', project_name: 'בבלי' })
       )
-      expect(ctx.reply).toHaveBeenCalledWith(expect.stringContaining('בבלי'))
+      expect(ctx.reply).toHaveBeenCalledWith(expect.stringContaining('בבלי'), expect.anything())
     })
   })
 
@@ -397,8 +376,11 @@ describe('registerHandlers', () => {
       step: 'confirm',
       project_id: 'proj-1',
       project_name: 'בבלי',
-      work_description: 'פיתוח',
       notes: null,
+      payment_type: 'daily',
+      daily_rate: 350,
+      price_per_slide: null,
+      slides_count: null,
     }
 
     it('does nothing if session is not in confirm step', async () => {
@@ -427,7 +409,7 @@ describe('registerHandlers', () => {
       const ctx = makeCtx()
       await bot.triggerAction('confirm', ctx)
       expect(db.chains.daily_reports.insert).toHaveBeenCalledWith(
-        expect.objectContaining({ employee_id: 'emp-1', location: 'בבלי', work_description: 'פיתוח' })
+        expect.objectContaining({ employee_id: 'emp-1', location: 'בבלי' })
       )
       expect(ctx.reply).toHaveBeenCalledWith('הדוח נשמר. ✓\n\nיום טוב!')
     })
@@ -477,7 +459,7 @@ describe('registerHandlers', () => {
 
     it('shows confirm summary with no notes', async () => {
       db.chains.bot_sessions.maybeSingle.mockResolvedValue({
-        data: { step: 'notes', project_name: 'עזריאלי', work_description: 'ישיבות', notes: null, payment_type: 'per_slide', price_per_slide: 50, slides_count: 8, daily_rate: null },
+        data: { step: 'notes', project_name: 'עזריאלי', notes: null, payment_type: 'per_slide', price_per_slide: 50, slides_count: 8, daily_rate: null },
         error: null,
       })
       const ctx = makeCtx()

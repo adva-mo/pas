@@ -135,7 +135,7 @@ export function registerHandlers(bot: Telegraf) {
 
     await db.from('bot_sessions').upsert({
       telegram_user_id: telegramUserId,
-      step: 'work',
+      step: 'payment_type',
       project_id: projectId,
       project_name: projectName,
       updated_at: new Date().toISOString(),
@@ -143,7 +143,13 @@ export function registerHandlers(bot: Telegraf) {
 
     await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply(`פרויקט: ${projectName}\n\nמה עשית היום?`)
+    await ctx.reply(
+      `פרויקט: ${projectName}\n\nסוג תשלום?`,
+      Markup.inlineKeyboard([
+        Markup.button.callback('יומי', 'payment:daily'),
+        Markup.button.callback('לפי גלישה', 'payment:per_slide'),
+      ])
+    )
   })
 
   // Payment type buttons
@@ -213,7 +219,7 @@ export function registerHandlers(bot: Telegraf) {
       project_id: session.project_id,
       location: session.project_name!,
       work_date: today,
-      work_description: session.work_description!,
+      work_description: session.work_description ?? null,
       notes: session.notes ?? null,
       payment_type: (session.payment_type as 'daily' | 'per_slide') ?? null,
       daily_rate: session.daily_rate ?? null,
@@ -304,28 +310,6 @@ export function registerHandlers(bot: Telegraf) {
       return
     }
 
-    if (session.step === 'work') {
-      if (!text) {
-        await ctx.reply('אנא תאר מה עשית היום.')
-        return
-      }
-
-      await db.from('bot_sessions').update({
-        step: 'payment_type',
-        work_description: text,
-        updated_at: new Date().toISOString(),
-      }).eq('telegram_user_id', telegramUserId)
-
-      await ctx.reply(
-        'סוג תשלום?',
-        Markup.inlineKeyboard([
-          Markup.button.callback('יומי', 'payment:daily'),
-          Markup.button.callback('לפי גלישה', 'payment:per_slide'),
-        ])
-      )
-      return
-    }
-
     if (session.step === 'daily_rate') {
       const value = parseFloat(text)
       if (isNaN(value) || value <= 0) {
@@ -382,7 +366,7 @@ export function registerHandlers(bot: Telegraf) {
       return
     }
 
-    if (session.step === 'project' || session.step === 'payment_type') {
+    if (session.step === 'project' || session.step === 'payment_type' || session.step === 'work') {
       await ctx.reply('אנא בחר מהאפשרויות למעלה.')
       return
     }
@@ -414,7 +398,6 @@ export function registerHandlers(bot: Telegraf) {
 
 type SessionForSummary = {
   project_name: string | null
-  work_description: string | null
   notes: string | null
   payment_type: string | null
   daily_rate: number | null
@@ -450,7 +433,6 @@ async function handleNotesAndShowSummary(
     `*סיכום*`,
     `📅 תאריך: ${today}`,
     `📍 פרויקט: ${session.project_name}`,
-    `📝 עבודה: ${session.work_description}`,
     paymentLine,
     notes ? `💬 הערות: ${notes}` : null,
   ].filter(Boolean).join('\n')

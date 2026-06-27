@@ -49,7 +49,7 @@ export interface Database {
           project_id: string | null
           location: string
           work_date: string
-          work_description: string
+          work_description: string | null
           notes: string | null
           status: 'submitted' | 'reviewed'
           admin_notes: string | null
