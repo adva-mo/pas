@@ -31,7 +31,7 @@ export default async function ReportsPage({ searchParams }: Props) {
   if (params.date_to) query = query.lte('work_date', params.date_to)
   if (params.employee) query = query.eq('employee_id', params.employee)
   if (params.project) query = query.eq('project_id', params.project)
-  if (params.q) query = query.or(`work_description.ilike.%${params.q}%,location.ilike.%${params.q}%,notes.ilike.%${params.q}%`)
+  if (params.q) query = query.or(`location.ilike.%${params.q}%,notes.ilike.%${params.q}%`)
 
   const { data: reports } = (await query) as { data: ReportRow[] | null }
 

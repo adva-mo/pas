@@ -34,12 +34,12 @@ export async function GET(req: NextRequest) {
   if (params.get('project')) query = query.eq('project_id', params.get('project')!)
   if (params.get('q')) {
     const q = params.get('q')!
-    query = query.or(`work_description.ilike.%${q}%,location.ilike.%${q}%,notes.ilike.%${q}%`)
+    query = query.or(`location.ilike.%${q}%,notes.ilike.%${q}%`)
   }
 
   const { data: reports } = await query
 
-  const header = toCsvRow(['Date', 'Employee', 'Project', 'Work description', 'Notes', 'Status', 'Admin notes', 'Payment type', 'Daily rate', 'Price/slide', 'Slides', 'Total', 'Submitted at'])
+  const header = toCsvRow(['Date', 'Employee', 'Project', 'Notes', 'Status', 'Admin notes', 'Payment type', 'Daily rate', 'Price/slide', 'Slides', 'Total', 'Submitted at'])
   const rows = (reports ?? []).map(r => {
     const total = r.payment_type === 'daily'
       ? r.daily_rate
@@ -50,7 +50,6 @@ export async function GET(req: NextRequest) {
       r.work_date,
       (r as any).employees?.name,
       r.location,
-      r.work_description,
       r.notes,
       r.status,
       r.admin_notes,

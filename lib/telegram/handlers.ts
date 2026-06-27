@@ -219,7 +219,6 @@ export function registerHandlers(bot: Telegraf) {
       project_id: session.project_id,
       location: session.project_name!,
       work_date: today,
-      work_description: session.work_description ?? null,
       notes: session.notes ?? null,
       payment_type: (session.payment_type as 'daily' | 'per_slide') ?? null,
       daily_rate: session.daily_rate ?? null,
