@@ -160,12 +160,129 @@ describe('registerHandlers', () => {
       })
     })
 
-    it('saves work description and asks for notes', async () => {
+    it('saves work description and asks for payment type', async () => {
       const ctx = makeCtx({ message: { text: 'פיתוח ממשק משתמש' } })
       await bot.triggerText(ctx)
 
       expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
-        expect.objectContaining({ step: 'notes', work_description: 'פיתוח ממשק משתמש' })
+        expect.objectContaining({ step: 'payment_type', work_description: 'פיתוח ממשק משתמש' })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith('סוג תשלום?', expect.anything())
+    })
+  })
+
+  // ─── payment type actions ──────────────────────────────────────────────────
+
+  describe('payment:daily button', () => {
+    it('sets payment_type to daily and asks for daily rate', async () => {
+      const ctx = makeCtx()
+      await bot.triggerAction('payment:daily', ctx)
+
+      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'daily_rate', payment_type: 'daily' })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith('מה המחיר ליום (בש״ח)?')
+    })
+  })
+
+  describe('payment:per_slide button', () => {
+    it('sets payment_type to per_slide and asks for price per slide', async () => {
+      const ctx = makeCtx()
+      await bot.triggerAction('payment:per_slide', ctx)
+
+      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'price_per_slide', payment_type: 'per_slide' })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith('מה המחיר לשקופית (בש״ח)?')
+    })
+  })
+
+  // ─── daily_rate step ────────────────────────────────────────────────────────
+
+  describe('daily_rate step — text input', () => {
+    beforeEach(() => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'daily_rate', payment_type: 'daily' },
+        error: null,
+      })
+    })
+
+    it('rejects non-numeric input', async () => {
+      const ctx = makeCtx({ message: { text: 'לא מספר' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מחיר חוקי (מספר חיובי).')
+      expect(db.chains.bot_sessions.update).not.toHaveBeenCalled()
+    })
+
+    it('rejects zero', async () => {
+      const ctx = makeCtx({ message: { text: '0' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מחיר חוקי (מספר חיובי).')
+    })
+
+    it('saves daily rate and asks for notes', async () => {
+      const ctx = makeCtx({ message: { text: '350' } })
+      await bot.triggerText(ctx)
+      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'notes', daily_rate: 350 })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith('יש הערות? אפשר לדלג.', expect.anything())
+    })
+  })
+
+  // ─── price_per_slide step ──────────────────────────────────────────────────
+
+  describe('price_per_slide step — text input', () => {
+    beforeEach(() => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'price_per_slide', payment_type: 'per_slide' },
+        error: null,
+      })
+    })
+
+    it('rejects invalid price', async () => {
+      const ctx = makeCtx({ message: { text: 'abc' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מחיר חוקי (מספר חיובי).')
+    })
+
+    it('saves price and asks for slide count', async () => {
+      const ctx = makeCtx({ message: { text: '50' } })
+      await bot.triggerText(ctx)
+      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'slides_count', price_per_slide: 50 })
+      )
+      expect(ctx.reply).toHaveBeenCalledWith('כמה שקופיות עשית?')
+    })
+  })
+
+  // ─── slides_count step ─────────────────────────────────────────────────────
+
+  describe('slides_count step — text input', () => {
+    beforeEach(() => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'slides_count', payment_type: 'per_slide', price_per_slide: 50 },
+        error: null,
+      })
+    })
+
+    it('rejects non-integer input', async () => {
+      const ctx = makeCtx({ message: { text: 'הרבה' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מספר שקופיות חוקי (מספר שלם חיובי).')
+    })
+
+    it('rejects zero', async () => {
+      const ctx = makeCtx({ message: { text: '0' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא הזן מספר שקופיות חוקי (מספר שלם חיובי).')
+    })
+
+    it('saves slide count and asks for notes', async () => {
+      const ctx = makeCtx({ message: { text: '8' } })
+      await bot.triggerText(ctx)
+      expect(db.chains.bot_sessions.update).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'notes', slides_count: 8 })
       )
       expect(ctx.reply).toHaveBeenCalledWith('יש הערות? אפשר לדלג.', expect.anything())
     })
@@ -176,7 +293,7 @@ describe('registerHandlers', () => {
   describe('notes step — text input', () => {
     it('saves notes and shows confirm summary', async () => {
       db.chains.bot_sessions.maybeSingle.mockResolvedValue({
-        data: { step: 'notes', project_name: 'בבלי', work_description: 'פיתוח', notes: null },
+        data: { step: 'notes', project_name: 'בבלי', work_description: 'פיתוח', notes: null, payment_type: 'daily', daily_rate: 350, price_per_slide: null, slides_count: null },
         error: null,
       })
 
@@ -203,7 +320,17 @@ describe('registerHandlers', () => {
       })
       const ctx = makeCtx({ message: { text: 'בבלי' } })
       await bot.triggerText(ctx)
-      expect(ctx.reply).toHaveBeenCalledWith('אנא בחר פרויקט מהאפשרויות למעלה.')
+      expect(ctx.reply).toHaveBeenCalledWith('אנא בחר מהאפשרויות למעלה.')
+    })
+
+    it('prompts to use buttons when in payment_type step', async () => {
+      db.chains.bot_sessions.maybeSingle.mockResolvedValue({
+        data: { step: 'payment_type' },
+        error: null,
+      })
+      const ctx = makeCtx({ message: { text: 'יומי' } })
+      await bot.triggerText(ctx)
+      expect(ctx.reply).toHaveBeenCalledWith('אנא בחר מהאפשרויות למעלה.')
     })
 
     it('prompts to use buttons when in confirm step', async () => {
@@ -350,7 +477,7 @@ describe('registerHandlers', () => {
 
     it('shows confirm summary with no notes', async () => {
       db.chains.bot_sessions.maybeSingle.mockResolvedValue({
-        data: { step: 'notes', project_name: 'עזריאלי', work_description: 'ישיבות', notes: null },
+        data: { step: 'notes', project_name: 'עזריאלי', work_description: 'ישיבות', notes: null, payment_type: 'per_slide', price_per_slide: 50, slides_count: 8, daily_rate: null },
         error: null,
       })
       const ctx = makeCtx()

@@ -29,6 +29,13 @@ async function askProject(ctx: BotContext) {
   await ctx.reply('איפה עבדת היום?', buildProjectKeyboard(projects))
 }
 
+async function askNotes(ctx: BotContext) {
+  await ctx.reply(
+    'יש הערות? אפשר לדלג.',
+    Markup.inlineKeyboard([Markup.button.callback('דלג', 'skip_notes')])
+  )
+}
+
 export function registerHandlers(bot: Telegraf) {
   // /start — self-register if unknown, reset session and begin
   bot.start(async (ctx) => {
@@ -139,6 +146,37 @@ export function registerHandlers(bot: Telegraf) {
     await ctx.reply(`פרויקט: ${projectName}\n\nמה עשית היום?`)
   })
 
+  // Payment type buttons
+  bot.action('payment:daily', async (ctx) => {
+    const telegramUserId = ctx.from!.id
+    const db = createSupabaseServiceClient()
+
+    await db.from('bot_sessions').update({
+      step: 'daily_rate',
+      payment_type: 'daily',
+      updated_at: new Date().toISOString(),
+    }).eq('telegram_user_id', telegramUserId)
+
+    await ctx.answerCbQuery()
+    await ctx.editMessageReplyMarkup(undefined)
+    await ctx.reply('מה המחיר ליום (בש״ח)?')
+  })
+
+  bot.action('payment:per_slide', async (ctx) => {
+    const telegramUserId = ctx.from!.id
+    const db = createSupabaseServiceClient()
+
+    await db.from('bot_sessions').update({
+      step: 'price_per_slide',
+      payment_type: 'per_slide',
+      updated_at: new Date().toISOString(),
+    }).eq('telegram_user_id', telegramUserId)
+
+    await ctx.answerCbQuery()
+    await ctx.editMessageReplyMarkup(undefined)
+    await ctx.reply('מה המחיר לשקופית (בש״ח)?')
+  })
+
   // Confirm button
   bot.action('confirm', async (ctx) => {
     const telegramUserId = ctx.from!.id
@@ -177,6 +215,10 @@ export function registerHandlers(bot: Telegraf) {
       work_date: today,
       work_description: session.work_description!,
       notes: session.notes ?? null,
+      payment_type: (session.payment_type as 'daily' | 'per_slide') ?? null,
+      daily_rate: session.daily_rate ?? null,
+      price_per_slide: session.price_per_slide ?? null,
+      slides_count: session.slides_count ?? null,
     })
 
     if (error) {
@@ -269,15 +311,69 @@ export function registerHandlers(bot: Telegraf) {
       }
 
       await db.from('bot_sessions').update({
-        step: 'notes',
+        step: 'payment_type',
         work_description: text,
         updated_at: new Date().toISOString(),
       }).eq('telegram_user_id', telegramUserId)
 
       await ctx.reply(
-        'יש הערות? אפשר לדלג.',
-        Markup.inlineKeyboard([Markup.button.callback('דלג', 'skip_notes')])
+        'סוג תשלום?',
+        Markup.inlineKeyboard([
+          Markup.button.callback('יומי', 'payment:daily'),
+          Markup.button.callback('לפי שקופית', 'payment:per_slide'),
+        ])
       )
+      return
+    }
+
+    if (session.step === 'daily_rate') {
+      const value = parseFloat(text)
+      if (isNaN(value) || value <= 0) {
+        await ctx.reply('אנא הזן מחיר חוקי (מספר חיובי).')
+        return
+      }
+
+      await db.from('bot_sessions').update({
+        step: 'notes',
+        daily_rate: value,
+        updated_at: new Date().toISOString(),
+      }).eq('telegram_user_id', telegramUserId)
+
+      await askNotes(ctx)
+      return
+    }
+
+    if (session.step === 'price_per_slide') {
+      const value = parseFloat(text)
+      if (isNaN(value) || value <= 0) {
+        await ctx.reply('אנא הזן מחיר חוקי (מספר חיובי).')
+        return
+      }
+
+      await db.from('bot_sessions').update({
+        step: 'slides_count',
+        price_per_slide: value,
+        updated_at: new Date().toISOString(),
+      }).eq('telegram_user_id', telegramUserId)
+
+      await ctx.reply('כמה שקופיות עשית?')
+      return
+    }
+
+    if (session.step === 'slides_count') {
+      const value = parseInt(text, 10)
+      if (isNaN(value) || value <= 0) {
+        await ctx.reply('אנא הזן מספר שקופיות חוקי (מספר שלם חיובי).')
+        return
+      }
+
+      await db.from('bot_sessions').update({
+        step: 'notes',
+        slides_count: value,
+        updated_at: new Date().toISOString(),
+      }).eq('telegram_user_id', telegramUserId)
+
+      await askNotes(ctx)
       return
     }
 
@@ -286,8 +382,8 @@ export function registerHandlers(bot: Telegraf) {
       return
     }
 
-    if (session.step === 'project') {
-      await ctx.reply('אנא בחר פרויקט מהאפשרויות למעלה.')
+    if (session.step === 'project' || session.step === 'payment_type') {
+      await ctx.reply('אנא בחר מהאפשרויות למעלה.')
       return
     }
 
@@ -316,10 +412,20 @@ export function registerHandlers(bot: Telegraf) {
   })
 }
 
+type SessionForSummary = {
+  project_name: string | null
+  work_description: string | null
+  notes: string | null
+  payment_type: string | null
+  daily_rate: number | null
+  price_per_slide: number | null
+  slides_count: number | null
+}
+
 async function handleNotesAndShowSummary(
   ctx: BotContext,
   telegramUserId: number,
-  session: { project_name: string | null; work_description: string | null; notes: string | null },
+  session: SessionForSummary,
   notes: string | null
 ) {
   const db = createSupabaseServiceClient()
@@ -331,11 +437,21 @@ async function handleNotesAndShowSummary(
   }).eq('telegram_user_id', telegramUserId)
 
   const today = new Date().toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+  let paymentLine: string | null = null
+  if (session.payment_type === 'daily' && session.daily_rate != null) {
+    paymentLine = `💰 תשלום: יומי — ₪${session.daily_rate}`
+  } else if (session.payment_type === 'per_slide' && session.price_per_slide != null && session.slides_count != null) {
+    const total = session.price_per_slide * session.slides_count
+    paymentLine = `💰 תשלום: לפי שקופית — ₪${session.price_per_slide} × ${session.slides_count} = ₪${total}`
+  }
+
   const summary = [
     `*סיכום*`,
     `📅 תאריך: ${today}`,
     `📍 פרויקט: ${session.project_name}`,
     `📝 עבודה: ${session.work_description}`,
+    paymentLine,
     notes ? `💬 הערות: ${notes}` : null,
   ].filter(Boolean).join('\n')
 

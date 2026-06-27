@@ -32,6 +32,15 @@ export default function ReportCard({ report }: Props) {
         <p className="text-xs text-gray-500 italic">{report.notes}</p>
       )}
 
+      {report.payment_type && (
+        <p className="text-xs text-gray-500">
+          {report.payment_type === 'daily'
+            ? `💰 יומי — ₪${report.daily_rate}`
+            : `💰 לפי שקופית — ₪${report.price_per_slide} × ${report.slides_count} = ₪${(report.price_per_slide! * report.slides_count!)}`
+          }
+        </p>
+      )}
+
       {report.admin_notes && (
         <div className="bg-blue-50 rounded-lg px-3 py-2">
           <p className="text-xs text-blue-600 font-medium mb-0.5">הערת מנהל</p>
