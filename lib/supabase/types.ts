@@ -33,6 +33,10 @@ export interface Database {
           project_name: string | null
           work_description: string | null
           notes: string | null
+          payment_type: string | null
+          daily_rate: number | null
+          price_per_slide: number | null
+          slides_count: number | null
           updated_at: string
         }
         Insert: Omit<Database['public']['Tables']['bot_sessions']['Row'], 'updated_at'> & { updated_at?: string }
@@ -45,10 +49,14 @@ export interface Database {
           project_id: string | null
           location: string
           work_date: string
-          work_description: string
+          work_description: string | null
           notes: string | null
           status: 'submitted' | 'reviewed'
           admin_notes: string | null
+          payment_type: 'daily' | 'per_slide' | null
+          daily_rate: number | null
+          price_per_slide: number | null
+          slides_count: number | null
           created_at: string
           updated_at: string
         }

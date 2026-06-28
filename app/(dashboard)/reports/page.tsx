@@ -31,7 +31,7 @@ export default async function ReportsPage({ searchParams }: Props) {
   if (params.date_to) query = query.lte('work_date', params.date_to)
   if (params.employee) query = query.eq('employee_id', params.employee)
   if (params.project) query = query.eq('project_id', params.project)
-  if (params.q) query = query.or(`work_description.ilike.%${params.q}%,location.ilike.%${params.q}%,notes.ilike.%${params.q}%`)
+  if (params.q) query = query.or(`location.ilike.%${params.q}%,notes.ilike.%${params.q}%`)
 
   const { data: reports } = (await query) as { data: ReportRow[] | null }
 
@@ -112,7 +112,7 @@ export default async function ReportsPage({ searchParams }: Props) {
                   <th className="text-right px-4 py-3 font-medium text-gray-500">תאריך</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">עובד</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">פרויקט</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">עבודה</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">תשלום</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">סטטוס</th>
                   <th className="px-4 py-3" />
                 </tr>
@@ -125,7 +125,10 @@ export default async function ReportsPage({ searchParams }: Props) {
                     </td>
                     <td className="px-4 py-3 text-gray-900 font-medium">{r.employees?.name}</td>
                     <td className="px-4 py-3 text-gray-700">{r.location}</td>
-                    <td className="px-4 py-3 text-gray-700 max-w-xs truncate">{r.work_description}</td>
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                      {r.payment_type === 'daily' && `יומי ₪${r.daily_rate ?? '—'}`}
+                      {r.payment_type === 'per_slide' && r.price_per_slide != null && r.slides_count != null && `₪${r.price_per_slide}×${r.slides_count}`}
+                    </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={r.status} />
                     </td>

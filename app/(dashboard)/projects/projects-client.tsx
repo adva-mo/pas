@@ -81,6 +81,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                 required
                 type="text"
                 placeholder="לדוגמה: מגדל בבלי"
+                maxLength={30}
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 className="w-full h-12 px-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -122,6 +123,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                     <input
                       autoFocus
                       type="text"
+                      maxLength={30}
                       value={editName}
                       onChange={e => setEditName(e.target.value)}
                       onBlur={() => handleRename(p)}

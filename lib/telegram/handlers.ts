@@ -3,8 +3,11 @@ import { createSupabaseServiceClient } from '@/lib/supabase/server'
 
 type BotContext = Context
 
+const SUBMIT_REPORT_BUTTON = 'הגש דוח יומי'
+const persistentKeyboard = Markup.keyboard([[SUBMIT_REPORT_BUTTON]]).resize()
+
 function buildProjectKeyboard(projects: { id: string; name: string }[]) {
-  const buttons = projects.map(p => Markup.button.callback(p.name, `project:${p.id}:${p.name}`))
+  const buttons = projects.map(p => Markup.button.callback(p.name, `project:${p.id}`))
   // 2 columns
   const rows: ReturnType<typeof Markup.button.callback>[][] = []
   for (let i = 0; i < buttons.length; i += 2) {
@@ -27,6 +30,13 @@ async function askProject(ctx: BotContext) {
   }
 
   await ctx.reply('איפה עבדת היום?', buildProjectKeyboard(projects))
+}
+
+async function askNotes(ctx: BotContext) {
+  await ctx.reply(
+    'יש הערות? אפשר לדלג.',
+    Markup.inlineKeyboard([Markup.button.callback('דלג', 'skip_notes')])
+  )
 }
 
 export function registerHandlers(bot: Telegraf) {
@@ -93,21 +103,19 @@ export function registerHandlers(bot: Telegraf) {
   })
 
   // Project button tap
-  bot.action(/^project:(.+):(.+)$/, async (ctx) => {
+  bot.action(/^project:([^:]+)$/, async (ctx) => {
     const telegramUserId = ctx.from!.id
     const projectId = ctx.match[1]
-    const projectName = ctx.match[2]
     const db = createSupabaseServiceClient()
 
-    const { data: employee } = await db
-      .from('employees')
-      .select('id')
-      .eq('telegram_user_id', telegramUserId)
-      .eq('is_active', true)
-      .maybeSingle()
+    await ctx.answerCbQuery()
+
+    const [{ data: employee }, { data: project }] = await Promise.all([
+      db.from('employees').select('id').eq('telegram_user_id', telegramUserId).eq('is_active', true).maybeSingle(),
+      db.from('projects').select('name').eq('id', projectId).maybeSingle(),
+    ])
 
     if (!employee) {
-      await ctx.answerCbQuery()
       await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
@@ -121,28 +129,67 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (existing) {
-      await ctx.answerCbQuery()
       await ctx.reply('כבר הגשת דוח להיום.')
       return
     }
 
+    const projectName = project?.name ?? projectId
+
     await db.from('bot_sessions').upsert({
       telegram_user_id: telegramUserId,
-      step: 'work',
+      step: 'payment_type',
       project_id: projectId,
       project_name: projectName,
       updated_at: new Date().toISOString(),
     })
 
+    await ctx.editMessageReplyMarkup(undefined)
+    await ctx.reply(
+      `פרויקט: ${projectName}\n\nסוג תשלום?`,
+      Markup.inlineKeyboard([
+        Markup.button.callback('יומי', 'payment:daily'),
+        Markup.button.callback('לפי גלישה', 'payment:per_slide'),
+      ])
+    )
+  })
+
+  // Payment type buttons
+  bot.action('payment:daily', async (ctx) => {
+    const telegramUserId = ctx.from!.id
+    const db = createSupabaseServiceClient()
+
+    await db.from('bot_sessions').update({
+      step: 'daily_rate',
+      payment_type: 'daily',
+      updated_at: new Date().toISOString(),
+    }).eq('telegram_user_id', telegramUserId)
+
     await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply(`פרויקט: ${projectName}\n\nמה עשית היום?`)
+    await ctx.reply('מה המחיר ליום (בש״ח)?')
+  })
+
+  bot.action('payment:per_slide', async (ctx) => {
+    const telegramUserId = ctx.from!.id
+    const db = createSupabaseServiceClient()
+
+    await db.from('bot_sessions').update({
+      step: 'price_per_slide',
+      payment_type: 'per_slide',
+      updated_at: new Date().toISOString(),
+    }).eq('telegram_user_id', telegramUserId)
+
+    await ctx.answerCbQuery()
+    await ctx.editMessageReplyMarkup(undefined)
+    await ctx.reply('מה המחיר לגלישה (בש״ח)?')
   })
 
   // Confirm button
   bot.action('confirm', async (ctx) => {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
+
+    await ctx.answerCbQuery()
 
     const { data: session } = await db
       .from('bot_sessions')
@@ -151,7 +198,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!session || session.step !== 'confirm') {
-      await ctx.answerCbQuery()
       return
     }
 
@@ -163,7 +209,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!employee) {
-      await ctx.answerCbQuery()
       await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
@@ -175,12 +220,14 @@ export function registerHandlers(bot: Telegraf) {
       project_id: session.project_id,
       location: session.project_name!,
       work_date: today,
-      work_description: session.work_description!,
       notes: session.notes ?? null,
+      payment_type: (session.payment_type as 'daily' | 'per_slide') ?? null,
+      daily_rate: session.daily_rate ?? null,
+      price_per_slide: session.price_per_slide ?? null,
+      slides_count: session.slides_count ?? null,
     })
 
     if (error) {
-      await ctx.answerCbQuery()
       if (error.code === '23505') {
         await ctx.reply('כבר הגשת דוח להיום.')
       } else {
@@ -191,17 +238,16 @@ export function registerHandlers(bot: Telegraf) {
     }
 
     await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!')
+    await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!', persistentKeyboard)
   })
 
   // Start over button
   bot.action('start_over', async (ctx) => {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
-    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.answerCbQuery()
+    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.editMessageReplyMarkup(undefined)
     await ctx.reply('מתחיל מחדש.')
     await askProject(ctx)
@@ -212,6 +258,24 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from.id
     const text = ctx.message.text.trim()
     const db = createSupabaseServiceClient()
+
+    if (text === SUBMIT_REPORT_BUTTON) {
+      const { data: employee } = await db
+        .from('employees')
+        .select('id, name, is_active')
+        .eq('telegram_user_id', telegramUserId)
+        .maybeSingle()
+
+      if (!employee || !employee.is_active) {
+        await ctx.reply('שלח /start כדי להירשם.')
+        return
+      }
+
+      await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+      await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
+      await askProject(ctx)
+      return
+    }
 
     const { data: session } = await db
       .from('bot_sessions')
@@ -247,7 +311,7 @@ export function registerHandlers(bot: Telegraf) {
             .single()
           if (existing) {
             await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-            await ctx.reply(`ברוך הבא חזרה, ${existing.name}!`, Markup.removeKeyboard())
+            await ctx.reply(`ברוך הבא חזרה, ${existing.name}!`, persistentKeyboard)
             await askProject(ctx)
             return
           }
@@ -257,27 +321,59 @@ export function registerHandlers(bot: Telegraf) {
       }
 
       await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-      await ctx.reply(`נעים להכיר, ${name}! 🎉`, Markup.removeKeyboard())
+      await ctx.reply(`נעים להכיר, ${name}! 🎉`, persistentKeyboard)
       await askProject(ctx)
       return
     }
 
-    if (session.step === 'work') {
-      if (!text) {
-        await ctx.reply('אנא תאר מה עשית היום.')
+    if (session.step === 'daily_rate') {
+      const value = parseFloat(text)
+      if (isNaN(value) || value <= 0) {
+        await ctx.reply('אנא הזן מחיר חוקי (מספר חיובי).')
         return
       }
 
       await db.from('bot_sessions').update({
         step: 'notes',
-        work_description: text,
+        daily_rate: value,
         updated_at: new Date().toISOString(),
       }).eq('telegram_user_id', telegramUserId)
 
-      await ctx.reply(
-        'יש הערות? אפשר לדלג.',
-        Markup.inlineKeyboard([Markup.button.callback('דלג', 'skip_notes')])
-      )
+      await askNotes(ctx)
+      return
+    }
+
+    if (session.step === 'price_per_slide') {
+      const value = parseFloat(text)
+      if (isNaN(value) || value <= 0) {
+        await ctx.reply('אנא הזן מחיר חוקי (מספר חיובי).')
+        return
+      }
+
+      await db.from('bot_sessions').update({
+        step: 'slides_count',
+        price_per_slide: value,
+        updated_at: new Date().toISOString(),
+      }).eq('telegram_user_id', telegramUserId)
+
+      await ctx.reply('כמה גלישות עשית?')
+      return
+    }
+
+    if (session.step === 'slides_count') {
+      const value = Number(text)
+      if (!Number.isInteger(value) || value <= 0) {
+        await ctx.reply('אנא הזן מספר גלישות חוקי (מספר שלם חיובי).')
+        return
+      }
+
+      await db.from('bot_sessions').update({
+        step: 'notes',
+        slides_count: value,
+        updated_at: new Date().toISOString(),
+      }).eq('telegram_user_id', telegramUserId)
+
+      await askNotes(ctx)
       return
     }
 
@@ -286,8 +382,8 @@ export function registerHandlers(bot: Telegraf) {
       return
     }
 
-    if (session.step === 'project') {
-      await ctx.reply('אנא בחר פרויקט מהאפשרויות למעלה.')
+    if (session.step === 'project' || session.step === 'payment_type' || session.step === 'work') {
+      await ctx.reply('אנא בחר מהאפשרויות למעלה.')
       return
     }
 
@@ -302,24 +398,34 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
 
+    await ctx.answerCbQuery()
+
     const { data: session } = await db
       .from('bot_sessions')
       .select('*')
       .eq('telegram_user_id', telegramUserId)
       .maybeSingle()
 
-    if (!session) { await ctx.answerCbQuery(); return }
+    if (!session) { return }
 
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
     await handleNotesAndShowSummary(ctx, telegramUserId, session, null)
   })
 }
 
+type SessionForSummary = {
+  project_name: string | null
+  notes: string | null
+  payment_type: string | null
+  daily_rate: number | null
+  price_per_slide: number | null
+  slides_count: number | null
+}
+
 async function handleNotesAndShowSummary(
   ctx: BotContext,
   telegramUserId: number,
-  session: { project_name: string | null; work_description: string | null; notes: string | null },
+  session: SessionForSummary,
   notes: string | null
 ) {
   const db = createSupabaseServiceClient()
@@ -331,11 +437,20 @@ async function handleNotesAndShowSummary(
   }).eq('telegram_user_id', telegramUserId)
 
   const today = new Date().toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+  let paymentLine: string | null = null
+  if (session.payment_type === 'daily' && session.daily_rate != null) {
+    paymentLine = `💰 תשלום: יומי — ₪${session.daily_rate}`
+  } else if (session.payment_type === 'per_slide' && session.price_per_slide != null && session.slides_count != null) {
+    const total = session.price_per_slide * session.slides_count
+    paymentLine = `💰 תשלום: לפי גלישה — ₪${session.price_per_slide} × ${session.slides_count} = ₪${total}`
+  }
+
   const summary = [
     `*סיכום*`,
     `📅 תאריך: ${today}`,
     `📍 פרויקט: ${session.project_name}`,
-    `📝 עבודה: ${session.work_description}`,
+    paymentLine,
     notes ? `💬 הערות: ${notes}` : null,
   ].filter(Boolean).join('\n')
 

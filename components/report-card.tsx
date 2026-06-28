@@ -26,10 +26,19 @@ export default function ReportCard({ report }: Props) {
         </span>
       </div>
 
-      <p className="text-sm text-gray-700 leading-relaxed">{report.work_description}</p>
-
       {report.notes && (
         <p className="text-xs text-gray-500 italic">{report.notes}</p>
+      )}
+
+      {report.payment_type && (
+        <p className="text-xs text-gray-500">
+          {report.payment_type === 'daily'
+            ? `💰 יומי — ₪${report.daily_rate ?? '—'}`
+            : report.price_per_slide != null && report.slides_count != null
+              ? `💰 לפי גלישה — ₪${report.price_per_slide} × ${report.slides_count} = ₪${report.price_per_slide * report.slides_count}`
+              : `💰 לפי גלישה`
+          }
+        </p>
       )}
 
       {report.admin_notes && (
