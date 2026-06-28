@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "bot:dev": "npx tsx scripts/bot-dev.ts",
-    "test": "vitest run",
+    "test": "tsc --noEmit && vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },

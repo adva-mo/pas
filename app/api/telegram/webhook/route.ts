@@ -8,7 +8,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let body: unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any
   try {
     body = await req.json()
   } catch {
