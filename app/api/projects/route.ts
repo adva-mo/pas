@@ -12,9 +12,13 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
+  const name = typeof body.name === 'string' ? body.name.trim() : ''
+  if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+  if (name.length > 30) return NextResponse.json({ error: 'Project name must be 30 characters or fewer' }, { status: 400 })
+
   const db = createSupabaseServiceClient()
 
-  const { error } = await db.from('projects').insert({ name: body.name })
+  const { error } = await db.from('projects').insert({ name })
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'A project with this name already exists' }, { status: 409 })

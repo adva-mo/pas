@@ -3,8 +3,11 @@ import { createSupabaseServiceClient } from '@/lib/supabase/server'
 
 type BotContext = Context
 
+const SUBMIT_REPORT_BUTTON = 'הגש דוח יומי'
+const persistentKeyboard = Markup.keyboard([[SUBMIT_REPORT_BUTTON]]).resize()
+
 function buildProjectKeyboard(projects: { id: string; name: string }[]) {
-  const buttons = projects.map(p => Markup.button.callback(p.name, `project:${p.id}:${p.name}`))
+  const buttons = projects.map(p => Markup.button.callback(p.name, `project:${p.id}`))
   // 2 columns
   const rows: ReturnType<typeof Markup.button.callback>[][] = []
   for (let i = 0; i < buttons.length; i += 2) {
@@ -100,21 +103,19 @@ export function registerHandlers(bot: Telegraf) {
   })
 
   // Project button tap
-  bot.action(/^project:(.+):(.+)$/, async (ctx) => {
+  bot.action(/^project:([^:]+)$/, async (ctx) => {
     const telegramUserId = ctx.from!.id
     const projectId = ctx.match[1]
-    const projectName = ctx.match[2]
     const db = createSupabaseServiceClient()
 
-    const { data: employee } = await db
-      .from('employees')
-      .select('id')
-      .eq('telegram_user_id', telegramUserId)
-      .eq('is_active', true)
-      .maybeSingle()
+    await ctx.answerCbQuery()
+
+    const [{ data: employee }, { data: project }] = await Promise.all([
+      db.from('employees').select('id').eq('telegram_user_id', telegramUserId).eq('is_active', true).maybeSingle(),
+      db.from('projects').select('name').eq('id', projectId).maybeSingle(),
+    ])
 
     if (!employee) {
-      await ctx.answerCbQuery()
       await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
@@ -128,10 +129,11 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (existing) {
-      await ctx.answerCbQuery()
       await ctx.reply('כבר הגשת דוח להיום.')
       return
     }
+
+    const projectName = project?.name ?? projectId
 
     await db.from('bot_sessions').upsert({
       telegram_user_id: telegramUserId,
@@ -141,7 +143,6 @@ export function registerHandlers(bot: Telegraf) {
       updated_at: new Date().toISOString(),
     })
 
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
     await ctx.reply(
       `פרויקט: ${projectName}\n\nסוג תשלום?`,
@@ -188,6 +189,8 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
 
+    await ctx.answerCbQuery()
+
     const { data: session } = await db
       .from('bot_sessions')
       .select('*')
@@ -195,7 +198,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!session || session.step !== 'confirm') {
-      await ctx.answerCbQuery()
       return
     }
 
@@ -207,7 +209,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!employee) {
-      await ctx.answerCbQuery()
       await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
@@ -227,7 +228,6 @@ export function registerHandlers(bot: Telegraf) {
     })
 
     if (error) {
-      await ctx.answerCbQuery()
       if (error.code === '23505') {
         await ctx.reply('כבר הגשת דוח להיום.')
       } else {
@@ -238,17 +238,16 @@ export function registerHandlers(bot: Telegraf) {
     }
 
     await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!')
+    await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!', persistentKeyboard)
   })
 
   // Start over button
   bot.action('start_over', async (ctx) => {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
-    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.answerCbQuery()
+    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.editMessageReplyMarkup(undefined)
     await ctx.reply('מתחיל מחדש.')
     await askProject(ctx)
@@ -259,6 +258,24 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from.id
     const text = ctx.message.text.trim()
     const db = createSupabaseServiceClient()
+
+    if (text === SUBMIT_REPORT_BUTTON) {
+      const { data: employee } = await db
+        .from('employees')
+        .select('id, name, is_active')
+        .eq('telegram_user_id', telegramUserId)
+        .maybeSingle()
+
+      if (!employee || !employee.is_active) {
+        await ctx.reply('שלח /start כדי להירשם.')
+        return
+      }
+
+      await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+      await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
+      await askProject(ctx)
+      return
+    }
 
     const { data: session } = await db
       .from('bot_sessions')
@@ -294,7 +311,7 @@ export function registerHandlers(bot: Telegraf) {
             .single()
           if (existing) {
             await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-            await ctx.reply(`ברוך הבא חזרה, ${existing.name}!`, Markup.removeKeyboard())
+            await ctx.reply(`ברוך הבא חזרה, ${existing.name}!`, persistentKeyboard)
             await askProject(ctx)
             return
           }
@@ -304,7 +321,7 @@ export function registerHandlers(bot: Telegraf) {
       }
 
       await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-      await ctx.reply(`נעים להכיר, ${name}! 🎉`, Markup.removeKeyboard())
+      await ctx.reply(`נעים להכיר, ${name}! 🎉`, persistentKeyboard)
       await askProject(ctx)
       return
     }
@@ -381,15 +398,16 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
 
+    await ctx.answerCbQuery()
+
     const { data: session } = await db
       .from('bot_sessions')
       .select('*')
       .eq('telegram_user_id', telegramUserId)
       .maybeSingle()
 
-    if (!session) { await ctx.answerCbQuery(); return }
+    if (!session) { return }
 
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
     await handleNotesAndShowSummary(ctx, telegramUserId, session, null)
   })
