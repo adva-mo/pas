@@ -42,11 +42,11 @@ async function beginReportFlow(ctx: BotContext, telegramUserId: number, employee
     .eq('work_date', today)
     .maybeSingle()
   if (existing) {
-    await ctx.reply(`היי ${employee.name}! כבר הגשת דוח היום. 👍`)
+    await ctx.reply(`היי ${employee.name}! כבר הגשת דוח היום. 👍`, persistentKeyboard)
     return
   }
   await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-  await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
+  await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`, persistentKeyboard)
   await askProject(ctx)
 }
 

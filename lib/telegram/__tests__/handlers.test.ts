@@ -30,7 +30,7 @@ describe('registerHandlers', () => {
       const ctx = makeCtx()
       await bot.triggerStart(ctx)
 
-      expect(ctx.reply).toHaveBeenCalledWith(expect.stringContaining('דני'))
+      expect(ctx.reply).toHaveBeenCalledWith(expect.stringContaining('דני'), expect.anything())
       expect(ctx.reply).toHaveBeenCalledWith('איפה עבדת היום?', expect.anything())
     })
   })
