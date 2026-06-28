@@ -7,7 +7,7 @@ const SUBMIT_REPORT_BUTTON = 'הגש דוח יומי'
 const persistentKeyboard = Markup.keyboard([[SUBMIT_REPORT_BUTTON]]).resize()
 
 function buildProjectKeyboard(projects: { id: string; name: string }[]) {
-  const buttons = projects.map(p => Markup.button.callback(p.name, `project:${p.id}:${p.name}`))
+  const buttons = projects.map(p => Markup.button.callback(p.name, `project:${p.id}`))
   // 2 columns
   const rows: ReturnType<typeof Markup.button.callback>[][] = []
   for (let i = 0; i < buttons.length; i += 2) {
@@ -96,20 +96,17 @@ export function registerHandlers(bot: Telegraf) {
   })
 
   // Project button tap
-  bot.action(/^project:(.+):(.+)$/, async (ctx) => {
+  bot.action(/^project:([^:]+)$/, async (ctx) => {
     const telegramUserId = ctx.from!.id
     const projectId = ctx.match[1]
-    const projectName = ctx.match[2]
     const db = createSupabaseServiceClient()
 
     await ctx.answerCbQuery()
 
-    const { data: employee } = await db
-      .from('employees')
-      .select('id')
-      .eq('telegram_user_id', telegramUserId)
-      .eq('is_active', true)
-      .maybeSingle()
+    const [{ data: employee }, { data: project }] = await Promise.all([
+      db.from('employees').select('id').eq('telegram_user_id', telegramUserId).eq('is_active', true).maybeSingle(),
+      db.from('projects').select('name').eq('id', projectId).maybeSingle(),
+    ])
 
     if (!employee) {
       await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
@@ -128,6 +125,8 @@ export function registerHandlers(bot: Telegraf) {
       await ctx.reply('כבר הגשת דוח להיום.')
       return
     }
+
+    const projectName = project?.name ?? projectId
 
     await db.from('bot_sessions').upsert({
       telegram_user_id: telegramUserId,

@@ -16,7 +16,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const db = createSupabaseServiceClient()
 
   const update: Record<string, unknown> = {}
-  if (body.name !== undefined) update.name = body.name
+  if (body.name !== undefined) {
+    const name = typeof body.name === 'string' ? body.name.trim() : ''
+    if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    if (name.length > 30) return NextResponse.json({ error: 'Project name must be 30 characters or fewer' }, { status: 400 })
+    update.name = name
+  }
   if (body.is_active !== undefined) update.is_active = body.is_active
 
   const { error } = await db.from('projects').update(update).eq('id', id)

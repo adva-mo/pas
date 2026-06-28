@@ -233,29 +233,32 @@ describe('registerHandlers', () => {
   // ─── project action ────────────────────────────────────────────────────────
 
   describe('project button tap', () => {
-    const projectCtx = () => makeCtx({ match: ['project:proj-1:בבלי', 'proj-1', 'בבלי'] })
+    const projectCtx = () => makeCtx({ match: ['project:proj-1', 'proj-1'] })
 
     it('blocks employee not found', async () => {
       db.chains.employees.maybeSingle.mockResolvedValue({ data: null, error: null })
+      db.chains.projects.maybeSingle.mockResolvedValue({ data: { name: 'בבלי' }, error: null })
       const ctx = projectCtx()
-      await bot.triggerAction('/^project:(.+):(.+)$/', ctx)
+      await bot.triggerAction('/^project:([^:]+)$/', ctx)
       expect(ctx.answerCbQuery).toHaveBeenCalled()
       expect(ctx.reply).toHaveBeenCalledWith('לא רשום במערכת. צור קשר עם המנהל.')
     })
 
     it('blocks duplicate report for today', async () => {
       db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
+      db.chains.projects.maybeSingle.mockResolvedValue({ data: { name: 'בבלי' }, error: null })
       db.chains.daily_reports.maybeSingle.mockResolvedValue({ data: { id: 'rep-1' }, error: null })
       const ctx = projectCtx()
-      await bot.triggerAction('/^project:(.+):(.+)$/', ctx)
+      await bot.triggerAction('/^project:([^:]+)$/', ctx)
       expect(ctx.reply).toHaveBeenCalledWith('כבר הגשת דוח להיום.')
     })
 
     it('saves project selection and asks for work description', async () => {
       db.chains.employees.maybeSingle.mockResolvedValue({ data: { id: 'emp-1' }, error: null })
+      db.chains.projects.maybeSingle.mockResolvedValue({ data: { name: 'בבלי' }, error: null })
       db.chains.daily_reports.maybeSingle.mockResolvedValue({ data: null, error: null })
       const ctx = projectCtx()
-      await bot.triggerAction('/^project:(.+):(.+)$/', ctx)
+      await bot.triggerAction('/^project:([^:]+)$/', ctx)
       expect(db.chains.bot_sessions.upsert).toHaveBeenCalledWith(
         expect.objectContaining({ step: 'work', project_id: 'proj-1', project_name: 'בבלי' })
       )
