@@ -32,6 +32,24 @@ async function askProject(ctx: BotContext) {
   await ctx.reply('איפה עבדת היום?', buildProjectKeyboard(projects))
 }
 
+async function beginReportFlow(ctx: BotContext, telegramUserId: number, employee: { id: string; name: string }) {
+  const db = createSupabaseServiceClient()
+  const today = new Date().toISOString().slice(0, 10)
+  const { data: existing } = await db
+    .from('daily_reports')
+    .select('id')
+    .eq('employee_id', employee.id)
+    .eq('work_date', today)
+    .maybeSingle()
+  if (existing) {
+    await ctx.reply(`היי ${employee.name}! כבר הגשת דוח היום. 👍`)
+    return
+  }
+  await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+  await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
+  await askProject(ctx)
+}
+
 async function askNotes(ctx: BotContext) {
   await ctx.reply(
     'יש הערות? אפשר לדלג.',
@@ -61,9 +79,7 @@ export function registerHandlers(bot: Telegraf) {
         await ctx.reply('החשבון שלך אינו פעיל. פנה למנהל שלך.')
         return
       }
-      await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-      await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
-      await askProject(ctx)
+      await beginReportFlow(ctx, telegramUserId, employee)
       return
     }
 
@@ -271,9 +287,7 @@ export function registerHandlers(bot: Telegraf) {
         return
       }
 
-      await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-      await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
-      await askProject(ctx)
+      await beginReportFlow(ctx, telegramUserId, employee)
       return
     }
 
