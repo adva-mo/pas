@@ -302,7 +302,7 @@ describe('registerHandlers', () => {
       expect(db.chains.daily_reports.insert).toHaveBeenCalledWith(
         expect.objectContaining({ employee_id: 'emp-1', location: 'בבלי', work_description: 'פיתוח' })
       )
-      expect(ctx.reply).toHaveBeenCalledWith('הדוח נשמר. ✓\n\nיום טוב!')
+      expect(ctx.reply).toHaveBeenCalledWith('הדוח נשמר. ✓\n\nיום טוב!', expect.objectContaining({ reply_markup: expect.objectContaining({ keyboard: [['הגש דוח יומי']] }) }))
     })
 
     it('shows duplicate error if report already exists', async () => {

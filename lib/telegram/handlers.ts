@@ -3,6 +3,9 @@ import { createSupabaseServiceClient } from '@/lib/supabase/server'
 
 type BotContext = Context
 
+const SUBMIT_REPORT_BUTTON = 'הגש דוח יומי'
+const persistentKeyboard = Markup.keyboard([[SUBMIT_REPORT_BUTTON]]).resize()
+
 function buildProjectKeyboard(projects: { id: string; name: string }[]) {
   const buttons = projects.map(p => Markup.button.callback(p.name, `project:${p.id}:${p.name}`))
   // 2 columns
@@ -190,7 +193,7 @@ export function registerHandlers(bot: Telegraf) {
 
     await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.editMessageReplyMarkup(undefined)
-    await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!')
+    await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!', persistentKeyboard)
   })
 
   // Start over button
@@ -209,6 +212,24 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from.id
     const text = ctx.message.text.trim()
     const db = createSupabaseServiceClient()
+
+    if (text === SUBMIT_REPORT_BUTTON) {
+      const { data: employee } = await db
+        .from('employees')
+        .select('id, name, is_active')
+        .eq('telegram_user_id', telegramUserId)
+        .maybeSingle()
+
+      if (!employee || !employee.is_active) {
+        await ctx.reply('שלח /start כדי להירשם.')
+        return
+      }
+
+      await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
+      await ctx.reply(`היי ${employee.name}! בוא נגיש את הדוח היומי.`)
+      await askProject(ctx)
+      return
+    }
 
     const { data: session } = await db
       .from('bot_sessions')
@@ -244,7 +265,7 @@ export function registerHandlers(bot: Telegraf) {
             .single()
           if (existing) {
             await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-            await ctx.reply(`ברוך הבא חזרה, ${existing.name}!`, Markup.removeKeyboard())
+            await ctx.reply(`ברוך הבא חזרה, ${existing.name}!`, persistentKeyboard)
             await askProject(ctx)
             return
           }
@@ -254,7 +275,7 @@ export function registerHandlers(bot: Telegraf) {
       }
 
       await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-      await ctx.reply(`נעים להכיר, ${name}! 🎉`, Markup.removeKeyboard())
+      await ctx.reply(`נעים להכיר, ${name}! 🎉`, persistentKeyboard)
       await askProject(ctx)
       return
     }
