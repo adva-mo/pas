@@ -99,6 +99,8 @@ export function registerHandlers(bot: Telegraf) {
     const projectName = ctx.match[2]
     const db = createSupabaseServiceClient()
 
+    await ctx.answerCbQuery()
+
     const { data: employee } = await db
       .from('employees')
       .select('id')
@@ -107,7 +109,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!employee) {
-      await ctx.answerCbQuery()
       await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
@@ -121,7 +122,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (existing) {
-      await ctx.answerCbQuery()
       await ctx.reply('כבר הגשת דוח להיום.')
       return
     }
@@ -134,7 +134,6 @@ export function registerHandlers(bot: Telegraf) {
       updated_at: new Date().toISOString(),
     })
 
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
     await ctx.reply(`פרויקט: ${projectName}\n\nמה עשית היום?`)
   })
@@ -144,6 +143,8 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
 
+    await ctx.answerCbQuery()
+
     const { data: session } = await db
       .from('bot_sessions')
       .select('*')
@@ -151,7 +152,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!session || session.step !== 'confirm') {
-      await ctx.answerCbQuery()
       return
     }
 
@@ -163,7 +163,6 @@ export function registerHandlers(bot: Telegraf) {
       .maybeSingle()
 
     if (!employee) {
-      await ctx.answerCbQuery()
       await ctx.reply('לא רשום במערכת. צור קשר עם המנהל.')
       return
     }
@@ -180,7 +179,6 @@ export function registerHandlers(bot: Telegraf) {
     })
 
     if (error) {
-      await ctx.answerCbQuery()
       if (error.code === '23505') {
         await ctx.reply('כבר הגשת דוח להיום.')
       } else {
@@ -191,7 +189,6 @@ export function registerHandlers(bot: Telegraf) {
     }
 
     await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
     await ctx.reply('הדוח נשמר. ✓\n\nיום טוב!')
   })
@@ -200,8 +197,8 @@ export function registerHandlers(bot: Telegraf) {
   bot.action('start_over', async (ctx) => {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
-    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.answerCbQuery()
+    await db.from('bot_sessions').delete().eq('telegram_user_id', telegramUserId)
     await ctx.editMessageReplyMarkup(undefined)
     await ctx.reply('מתחיל מחדש.')
     await askProject(ctx)
@@ -302,15 +299,16 @@ export function registerHandlers(bot: Telegraf) {
     const telegramUserId = ctx.from!.id
     const db = createSupabaseServiceClient()
 
+    await ctx.answerCbQuery()
+
     const { data: session } = await db
       .from('bot_sessions')
       .select('*')
       .eq('telegram_user_id', telegramUserId)
       .maybeSingle()
 
-    if (!session) { await ctx.answerCbQuery(); return }
+    if (!session) { return }
 
-    await ctx.answerCbQuery()
     await ctx.editMessageReplyMarkup(undefined)
     await handleNotesAndShowSummary(ctx, telegramUserId, session, null)
   })
